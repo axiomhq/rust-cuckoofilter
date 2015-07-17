@@ -6,6 +6,7 @@ pub const BUCKET_SIZE: usize = 4;
 pub struct Fingerprint (pub u8);
 
 /// Manages BUCKET_SIZE fingerprints at most.
+#[derive(Clone)]
 pub struct Bucket {
     pub buffer: Vec<Fingerprint>,
 }

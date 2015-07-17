@@ -22,8 +22,9 @@ mod util;
 extern crate rand;
 
 use bucket::{Bucket, Fingerprint, BUCKET_SIZE};
-use util::{get_next_pow_2, get_fai, get_alt_index};
+use util::{get_next_pow_2, get_fai, get_alt_index, FaI};
 use rand::Rng;
+use std::iter::repeat;
 
 pub const MAX_REBUCKET: usize = 500;
 
@@ -35,40 +36,38 @@ pub struct CuckooFilter {
 }
 
 impl CuckooFilter {
-    /**
-     * Returns a Cuckoo Filter with a given max Capacity
-     */
-    pub fn new(cap: u64) -> CuckooFilter {
-        let mut capacity = get_next_pow_2(cap);
-        capacity = capacity/BUCKET_SIZE as u64;
-        if capacity == 0 {
-            capacity = 1;
-        }
-        let mut buckets: Vec<Bucket> = vec![];
-        for _ in 0..capacity {
-            buckets.push(Bucket::new())
-        }
-        return CuckooFilter{buckets: buckets, count: 0,}
+    /// Constructs a Cockoo Filter with default capacity
+    pub fn new() -> CuckooFilter {
+        Self::default()
     }
 
-    /**
-     * Returns a Cuckoo Filter with a default max Capacity 1000000 items/
-     */
+    /// Constructs a Cuckoo Filter with a given max capacity
+    pub fn with_capacity(cap: u64) -> CuckooFilter {
+        let capacity = match get_next_pow_2(cap)/BUCKET_SIZE as u64 {
+            0 => 1,
+            cap => cap,
+        };
+
+        CuckooFilter {
+            buckets: repeat(Bucket::new()).take(capacity as usize).collect(),
+            count: 0,
+        }
+    }
+
+    /// Returns a Cuckoo Filter with a default max Capacity 1000000 items/
     pub fn default() -> CuckooFilter {
-        return CuckooFilter::new(1000000);
+        CuckooFilter::with_capacity(1000000)
     }
 
     /**
      * Returns if data is in filter.
      */
     pub fn contains(&mut self, data: &[u8]) -> bool {
-        let fai = get_fai(data);
-        let fp = fai.fp;
-        let i1 = fai.i1;
-        let i2 = fai.i2;
+        let FaI { fp, i1, i2 } = get_fai(data);
         let len = self.buckets.len();
         let b1 = self.buckets[i1%len].get_fingerprint_index(fp);
         let b2 = self.buckets[i2%len].get_fingerprint_index(fp);
+
         b1.or(b2).is_some()
     }
 
