@@ -5,17 +5,24 @@ pub const BUCKET_SIZE: usize = 4;
 #[derive(PartialEq, Copy, Clone)]
 pub struct Fingerprint (pub u8);
 
-pub struct Bucket (pub Vec<Fingerprint>);
+/// Manages BUCKET_SIZE fingerprints at most.
+pub struct Bucket {
+    pub buffer: Vec<Fingerprint>,
+}
 
 impl Bucket {
-
+    /// Creates a new bucket with a pre-allocated buffer.
     pub fn new() -> Bucket {
-        Bucket(Vec::with_capacity(BUCKET_SIZE))
+        Bucket {
+            buffer: Vec::with_capacity(BUCKET_SIZE)
+        }
     }
 
+    /// Inserts the fingerprint into the buffer if the buffer is not full. This
+    /// Operation will be O(1), since the buffer was pre-allocated.
     pub fn insert(&mut self, fp: Fingerprint) -> bool {
-        if self.0.len() < BUCKET_SIZE {
-            self.0.push(fp);
+        if self.buffer.len() < BUCKET_SIZE {
+            self.buffer.push(fp);
             true
         } else {
             false
@@ -26,19 +33,14 @@ impl Bucket {
     /// the bucket doesn't matter, we can use `swap_remove` to keep the runtime
     /// in O(1).
     pub fn delete(&mut self, fp: Fingerprint) -> bool {
-        let pos = self.0.iter().position(|e| *e == fp);
-        match pos {
-            Some(index) => { self.0.swap_remove(index); true }
+        match self.get_fingerprint_index(fp) {
+            Some(index) => { self.buffer.swap_remove(index); true }
             None => false
         }
     }
 
-    pub fn get_fingerprint_index(&mut self, fp: Fingerprint) -> usize {
-        for i in 0..self.0.len() {
-            if self.0[i] == fp {
-                return i;
-            }
-        }
-        BUCKET_SIZE + 1
+    /// Returns the index of the given fingerprint, if its found.
+    pub fn get_fingerprint_index(&mut self, fp: Fingerprint) -> Option<usize> {
+        self.buffer.iter().position(|e| *e == fp)
     }
 }

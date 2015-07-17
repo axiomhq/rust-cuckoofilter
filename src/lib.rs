@@ -69,7 +69,7 @@ impl CuckooFilter {
         let len = self.buckets.len();
         let b1 = self.buckets[i1%len].get_fingerprint_index(fp);
         let b2 = self.buckets[i2%len].get_fingerprint_index(fp);
-        return b1 < BUCKET_SIZE || b2 < BUCKET_SIZE;
+        b1.or(b2).is_some()
     }
 
     /**
@@ -142,8 +142,8 @@ impl CuckooFilter {
             let j = rand::thread_rng().gen_range(0.0, BUCKET_SIZE as f64) as usize;
             let newfp = fp;
             let len = self.buckets.len();
-            fp = self.buckets[i%len].0[j];
-            self.buckets[i%len].0[j] = newfp;
+            fp = self.buckets[i%len].buffer[j];
+            self.buckets[i%len].buffer[j] = newfp;
             i = get_alt_index(&mut fp, i);
             if self.put(fp, i) {
                 return true;
