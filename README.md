@@ -8,5 +8,40 @@ For details about the algorithm and citations please use this article for now
 
 ["Cuckoo Filter: Better Than Bloom" by Bin Fan, Dave Andersen and Michael Kaminsky](https://www.cs.cmu.edu/~dga/papers/cuckoo-conext2014.pdf)
 
+
+## Example usage
+
+```rust
+extern crate cuckoofilter;
+
+...
+
+let value: &str = "hello world";
+
+//Create cuckoo filter wit max capacity of 1000000 items
+let cf = cuckoofilter::new(1000000);
+
+// Add data to the filter
+let success = cf.add(&value.as_bytes());
+// success ==> true
+
+// Lookup if data is in the filter
+let success = cf.lookup(&value.as_bytes());
+// success ==> true
+
+// Test and add to the filter (if data does not exists then add)
+let success = cf.test_and_add(&value.as_bytes());
+// success ==> false
+
+// Test and add to the filter (if data does not exists then add)
+let success = cf.delete(&value.as_bytes());
+// success ==> true
+
+// Lookup if data is in the filter
+let success = cf.lookup(&value.as_bytes());
+// success ==> false
+```
+
+
 ##Note
 This implementation uses a a static bucket size of 4 fingerprints and a fingerprint size of 1 byte based on my understanding of an optimal bucket/fingerprint/size ratio from the aforementioned paper.
