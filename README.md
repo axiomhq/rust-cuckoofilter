@@ -33,7 +33,7 @@ let success = cf.lookup(&value.as_bytes());
 let success = cf.test_and_add(&value.as_bytes());
 // success ==> false
 
-// Test and add to the filter (if data does not exists then add)
+// Remove data from the filter.
 let success = cf.delete(&value.as_bytes());
 // success ==> true
 
