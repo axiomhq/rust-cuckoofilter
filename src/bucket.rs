@@ -10,7 +10,7 @@ pub struct Bucket (pub Vec<Fingerprint>);
 impl Bucket {
 
     pub fn new() -> Bucket {
-        Bucket(vec![])
+        Bucket(Vec::with_capacity(BUCKET_SIZE))
     }
 
     pub fn insert(&mut self, fp: Fingerprint) -> bool {
@@ -22,14 +22,15 @@ impl Bucket {
         }
     }
 
+    /// Deletes the given fingerprint from the bucket. Since the order inside
+    /// the bucket doesn't matter, we can use `swap_remove` to keep the runtime
+    /// in O(1).
     pub fn delete(&mut self, fp: Fingerprint) -> bool {
-        for i in 0..self.0.len() {
-            if self.0[i] == fp {
-                self.0.remove(i);
-                return true;
-            }
+        let pos = self.0.iter().position(|e| *e == fp);
+        match pos {
+            Some(index) => { self.0.swap_remove(index); true }
+            None => false
         }
-        false
     }
 
     pub fn get_fingerprint_index(&mut self, fp: Fingerprint) -> usize {
