@@ -29,14 +29,14 @@ fn test_insertion() {
 
     let mut split: Vec<&str> = web2.split("\n").collect();
 
-    let mut cf = CuckooFilter::new(1000000);
+    let mut cf = CuckooFilter::new();
     for s in &mut split {
         cf.test_and_add(&s.as_bytes());
     }
-    assert_eq!(cf.get_count(), 235033);
+    assert_eq!(cf.len(), 235033);
 
     for s in &mut split {
         cf.delete(&s.as_bytes());
     }
-    assert_eq!(cf.get_count(), 0);
+    assert_eq!(cf.len(), 0);
 }
