@@ -30,8 +30,8 @@ impl Bucket {
     }
 
     /// Deletes the given fingerprint from the bucket. Since the order inside
-    /// the bucket doesn't matter, we can use `swap_remove` to keep the runtime
-    /// in O(1).
+    /// the bucket doesn't matter, we can use `swap_remove` to make the
+    /// deletion O(1). Finding element still needs O(n).
     pub fn delete(&mut self, fp: Fingerprint) -> bool {
         match self.get_fingerprint_index(fp) {
             Some(index) => { self.buffer.swap_remove(index); true }
@@ -39,7 +39,7 @@ impl Bucket {
         }
     }
 
-    /// Returns the index of the given fingerprint, if its found.
+    /// Returns the index of the given fingerprint, if its found. O(n)
     pub fn get_fingerprint_index(&mut self, fp: Fingerprint) -> Option<usize> {
         self.buffer.iter().position(|e| *e == fp)
     }
