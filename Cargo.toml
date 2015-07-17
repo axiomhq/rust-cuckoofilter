@@ -17,7 +17,7 @@ readme = "./README.md"
 
 # This is a small list of keywords used to categorize and search for this
 # package.
-keywords = ["bloomfilter", "cuckoohashing", "cuckoofilter", "Count-distinct problem", "probabilistic counting", "probabilistic data structure"]
+keywords = ["bloomfilter", "cuckoohashing", "cuckoofilter"]
 
 # This is a string description of the license for this package. Currently
 # crates.io will validate the license provided against a whitelist of known
