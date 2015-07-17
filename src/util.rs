@@ -36,18 +36,6 @@ pub fn get_fai(data: &[u8]) -> FaI {
     }
 }
 
-pub fn get_next_pow_2(mut n: u64) -> u64 {
-    n-=1;
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    n |= n >> 16;
-    n |= n >> 32;
-    n+=1;
-    return n;
-}
-
 #[test]
 fn test_fp_and_index() {
     let data = &"seif".as_bytes();
