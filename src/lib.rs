@@ -22,7 +22,7 @@ mod util;
 extern crate rand;
 
 use bucket::{Bucket, Fingerprint, BUCKET_SIZE};
-use util::{get_next_pow_2, get_fai, get_alt_index, FaI};
+use util::{get_fai, get_alt_index, FaI};
 use rand::Rng;
 use std::iter::repeat;
 
@@ -32,7 +32,7 @@ pub const MAX_REBUCKET: usize = 500;
 // providing methods of add, delete, contains.
 pub struct CuckooFilter {
     buckets: Vec<Bucket>,
-    count: u64,
+    len: u64,
 }
 
 impl CuckooFilter {
@@ -43,14 +43,14 @@ impl CuckooFilter {
 
     /// Constructs a Cuckoo Filter with a given max capacity
     pub fn with_capacity(cap: u64) -> CuckooFilter {
-        let capacity = match get_next_pow_2(cap)/BUCKET_SIZE as u64 {
+        let capacity = match cap.next_power_of_two()/BUCKET_SIZE as u64 {
             0 => 1,
             cap => cap,
         };
 
         CuckooFilter {
             buckets: repeat(Bucket::new()).take(capacity as usize).collect(),
-            count: 0,
+            len: 0,
         }
     }
 
@@ -59,9 +59,7 @@ impl CuckooFilter {
         CuckooFilter::with_capacity(1000000)
     }
 
-    /**
-     * Returns if data is in filter.
-     */
+    /// Checks if `data` is in the filter.
     pub fn contains(&mut self, data: &[u8]) -> bool {
         let FaI { fp, i1, i2 } = get_fai(data);
         let len = self.buckets.len();
@@ -71,25 +69,18 @@ impl CuckooFilter {
         b1.or(b2).is_some()
     }
 
-    /**
-     * Add data to the filter.
-     * Returns true if successful.
-     */
+    /// Adds `data` to the filter. Returns true if the insertion was successful.
     pub fn add(&mut self, data: &[u8]) -> bool {
-        let fai = get_fai(data);
-        let fp = fai.fp;
-        let i1 = fai.i1;
-        let i2 = fai.i2;
+        let FaI { fp, i1, i2 } = get_fai(data);
         if self.put(fp, i1) || self.put(fp, i2) {
             return true;
         }
         return self.reinsert(fp, i2)
     }
-    /**
-     * If data is in filter and add an item to the filter if not exists.
-     * This is like using lookup and adding if it returns true.
-     * Returns true if data did not exist in filter an is added successfuly
-     */
+
+    /// Adds `data` to the filter if it does not exist in the filter yet.
+    /// Returns `true` if `data` was not yet present in the filter and added
+    /// successfully.
     pub fn test_and_add(&mut self, data: &[u8]) -> bool {
         if self.contains(data) {
             return false;
@@ -97,48 +88,42 @@ impl CuckooFilter {
         return self.add(data);
     }
 
-    /**
-     * Returns number of current inserted items;
-     */
-    pub fn get_count(&mut self) -> u64 {
-        return self.count;
+    /// Number of items in the filter.
+    pub fn len(&self) -> u64 {
+        self.len
     }
 
-    /**
-     * Delete an data from the filter.
-     * Returns true if successful (data exists in filter and was deleted).
-     */
+    /// Deletes `data` from the filter. Returns true if `data` existed in the
+    /// filter before.
     pub fn delete(&mut self, data: &[u8]) -> bool{
-        let fai = get_fai(data);
-        let fp = fai.fp;
-        let i1 = fai.i1;
-        let i2 = fai.i2;
+        let FaI { fp, i1, i2 } = get_fai(data);
 
-        return self.remove(fp, i1) || self.remove(fp, i2)
+        self.remove(fp, i1) || self.remove(fp, i2)
     }
 
-    fn remove (&mut self, fp: Fingerprint, i: usize) -> bool {
+    fn remove(&mut self, fp: Fingerprint, i: usize) -> bool {
         let len = self.buckets.len();
         if self.buckets[i%len].delete(fp) {
-            self.count -= 1;
-            return true;
+            self.len -= 1;
+            true
+        } else {
+            false
         }
-        return false;
     }
 
     fn put(&mut self, fp: Fingerprint, i: usize) -> bool {
         let len = self.buckets.len();
-        let mut b = &mut self.buckets[i%len];
-        if b.insert(fp) {
-            self.count+=1;
-            return true;
+        if self.buckets[i%len].insert(fp) {
+            self.len += 1;
+            true
+        } else {
+            false
         }
-        return false;
     }
 
     fn reinsert(&mut self, mut fp: Fingerprint, mut i: usize) -> bool {
         for _ in 0..MAX_REBUCKET {
-            let j = rand::thread_rng().gen_range(0.0, BUCKET_SIZE as f64) as usize;
+            let j = rand::thread_rng().gen_range(0, BUCKET_SIZE);
             let newfp = fp;
             let len = self.buckets.len();
             fp = self.buckets[i%len].buffer[j];
@@ -148,6 +133,7 @@ impl CuckooFilter {
                 return true;
             }
         }
-        return false;
+
+        false
     }
 }
