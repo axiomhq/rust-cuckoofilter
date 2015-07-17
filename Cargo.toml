@@ -1,0 +1,9 @@
+[package]
+name = "cuckoofilter"
+version = "0.1.0"
+authors = ["Seif Lotfy <seif.lotfy@gmail.com>"]
+
+[dependencies]
+farmhash = "1.1.2"
+byteorder = "*"
+rand = "0.3"
