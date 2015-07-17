@@ -75,7 +75,7 @@ impl CuckooFilter {
         if self.put(fp, i1) || self.put(fp, i2) {
             return true;
         }
-        return self.reinsert(fp, i2)
+        self.reinsert(fp, i2)
     }
 
     /// Adds `data` to the filter if it does not exist in the filter yet.
@@ -85,7 +85,7 @@ impl CuckooFilter {
         if self.contains(data) {
             return false;
         }
-        return self.add(data);
+        self.add(data)
     }
 
     /// Number of items in the filter.
