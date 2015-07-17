@@ -18,7 +18,7 @@ extern crate cuckoofilter;
 
 let value: &str = "hello world";
 
-//Create cuckoo filter wit max capacity of 1000000 items
+// Create cuckoo filter with max capacity of 1000000 items
 let cf = cuckoofilter::new(1000000);
 
 // Add data to the filter
