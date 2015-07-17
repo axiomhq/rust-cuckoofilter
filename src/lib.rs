@@ -1,3 +1,21 @@
+//! Cuckoo filter probabilistic data structure for membership testing and cardinlaity counting.
+//!
+//! # Usage
+//!
+//! This crate is [on crates.io](https://crates.io/crates/cuckoofilter) and can be
+//! used by adding `cuckoofilter` to the dependencies in your project's `Cargo.toml`.
+//!
+//! ```toml
+//! [dependencies]
+//! cuckoofilter = "0.1"
+//! ```
+//!
+//! And this in your crate root:
+//!
+//! ```rust
+//! extern crate cuckoofilter;
+//! ```
+
 mod bucket;
 mod util;
 
@@ -9,12 +27,17 @@ use rand::Rng;
 
 pub const MAX_REBUCKET: usize = 500;
 
+// A cuckoo filter class exposes a Bloomier filter interface,
+// providing methods of add, delete, contains.
 pub struct CuckooFilter {
     buckets: Vec<Bucket>,
     count: u64,
 }
 
 impl CuckooFilter {
+    /**
+     * Returns a Cuckoo Filter with a given max Capacity
+     */
     pub fn new(cap: u64) -> CuckooFilter {
         let mut capacity = get_next_pow_2(cap);
         capacity = capacity/BUCKET_SIZE as u64;
@@ -28,11 +51,17 @@ impl CuckooFilter {
         return CuckooFilter{buckets: buckets, count: 0,}
     }
 
+    /**
+     * Returns a Cuckoo Filter with a default max Capacity 1000000 items/
+     */
     pub fn default() -> CuckooFilter {
         return CuckooFilter::new(1000000);
     }
 
-    pub fn lookup(&mut self, data: &[u8]) -> bool {
+    /**
+     * Returns if data is in filter.
+     */
+    pub fn contains(&mut self, data: &[u8]) -> bool {
         let fai = get_fai(data);
         let fp = fai.fp;
         let i1 = fai.i1;
@@ -43,7 +72,11 @@ impl CuckooFilter {
         return b1 < BUCKET_SIZE || b2 < BUCKET_SIZE;
     }
 
-    pub fn insert(&mut self, data: &[u8]) -> bool {
+    /**
+     * Add data to the filter.
+     * Returns true if successful.
+     */
+    pub fn add(&mut self, data: &[u8]) -> bool {
         let fai = get_fai(data);
         let fp = fai.fp;
         let i1 = fai.i1;
@@ -53,18 +86,29 @@ impl CuckooFilter {
         }
         return self.reinsert(fp, i2)
     }
-
-    pub fn insert_unique(&mut self, data: &[u8]) -> bool {
-        if self.lookup(data) {
+    /**
+     * If data is in filter and add an item to the filter if not exists.
+     * This is like using lookup and adding if it returns true.
+     * Returns true if data did not exist in filter an is added successfuly
+     */
+    pub fn test_and_add(&mut self, data: &[u8]) -> bool {
+        if self.contains(data) {
             return false;
         }
-        return self.insert(data);
+        return self.add(data);
     }
 
+    /**
+     * Returns number of current inserted items;
+     */
     pub fn get_count(&mut self) -> u64 {
         return self.count;
     }
 
+    /**
+     * Delete an data from the filter.
+     * Returns true if successful (data exists in filter and was deleted).
+     */
     pub fn delete(&mut self, data: &[u8]) -> bool{
         let fai = get_fai(data);
         let fp = fai.fp;

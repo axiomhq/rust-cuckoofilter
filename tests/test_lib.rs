@@ -31,7 +31,7 @@ fn test_insertion() {
 
     let mut cf = CuckooFilter::new(1000000);
     for s in &mut split {
-        cf.insert_unique(&s.as_bytes());
+        cf.test_and_add(&s.as_bytes());
     }
     assert_eq!(cf.get_count(), 235033);
 
