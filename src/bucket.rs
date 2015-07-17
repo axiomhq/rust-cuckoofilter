@@ -10,15 +10,16 @@ pub struct Bucket (pub Vec<Fingerprint>);
 impl Bucket {
 
     pub fn new() -> Bucket {
-        return Bucket(vec![]);
+        Bucket(vec![])
     }
 
     pub fn insert(&mut self, fp: Fingerprint) -> bool {
         if self.0.len() < BUCKET_SIZE {
             self.0.push(fp);
-            return true;
-        } 
-        return false;
+            true
+        } else {
+            false
+        }
     }
 
     pub fn delete(&mut self, fp: Fingerprint) -> bool {
@@ -27,8 +28,8 @@ impl Bucket {
                 self.0.remove(i);
                 return true;
             }
-        } 
-        return false;
+        }
+        false
     }
 
     pub fn get_fingerprint_index(&mut self, fp: Fingerprint) -> usize {
@@ -36,7 +37,7 @@ impl Bucket {
             if self.0[i] == fp {
                 return i;
             }
-        } 
-        return BUCKET_SIZE + 1;
+        }
+        BUCKET_SIZE + 1
     }
 }
