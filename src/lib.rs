@@ -22,7 +22,7 @@ mod util;
 extern crate rand;
 
 use bucket::{Bucket, Fingerprint, BUCKET_SIZE};
-use util::{get_next_pow_2, get_fai, get_alt_index};
+use util::{get_next_pow_2, get_fai, get_alt_index, FaI};
 use rand::Rng;
 
 pub const MAX_REBUCKET: usize = 500;
@@ -62,10 +62,7 @@ impl CuckooFilter {
      * Returns if data is in filter.
      */
     pub fn contains(&mut self, data: &[u8]) -> bool {
-        let fai = get_fai(data);
-        let fp = fai.fp;
-        let i1 = fai.i1;
-        let i2 = fai.i2;
+        let FaI{fp, i1, i2} = get_fai(data);
         let len = self.buckets.len();
         let b1 = self.buckets[i1%len].get_fingerprint_index(fp);
         let b2 = self.buckets[i2%len].get_fingerprint_index(fp);
@@ -77,10 +74,7 @@ impl CuckooFilter {
      * Returns true if successful.
      */
     pub fn add(&mut self, data: &[u8]) -> bool {
-        let fai = get_fai(data);
-        let fp = fai.fp;
-        let i1 = fai.i1;
-        let i2 = fai.i2;
+        let FaI{fp, i1, i2} = get_fai(data);
         if self.put(fp, i1) || self.put(fp, i2) {
             return true;
         }
@@ -110,11 +104,7 @@ impl CuckooFilter {
      * Returns true if successful (data exists in filter and was deleted).
      */
     pub fn delete(&mut self, data: &[u8]) -> bool{
-        let fai = get_fai(data);
-        let fp = fai.fp;
-        let i1 = fai.i1;
-        let i2 = fai.i2;
-
+        let FaI{fp, i1, i2} = get_fai(data);
         return self.remove(fp, i1) || self.remove(fp, i2)
     }
 
