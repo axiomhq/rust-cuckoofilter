@@ -25,7 +25,12 @@ keywords = ["bloomfilter", "cuckoohashing", "cuckoofilter"]
 # be separated with a `/`
 license = "MIT"
 
+[features]
+default = []
+dev = ["clippy"]
+
 [dependencies]
 farmhash = "1.1.2"
 byteorder = "*"
 rand = "0.3"
+clippy = {version = "0.0.6", optional = true}

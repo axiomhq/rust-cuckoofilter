@@ -16,6 +16,9 @@
 //! extern crate cuckoofilter;
 //! ```
 
+#![cfg_attr(feature = "dev", feature(plugin))]
+#![cfg_attr(feature = "dev", plugin(clippy))]
+
 mod bucket;
 mod util;
 
@@ -91,6 +94,11 @@ impl CuckooFilter {
     /// Number of items in the filter.
     pub fn len(&self) -> u64 {
         self.len
+    }
+
+    /// Check if filter is empty
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
     }
 
     /// Deletes `data` from the filter. Returns true if `data` existed in the
