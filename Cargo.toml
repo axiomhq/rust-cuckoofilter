@@ -31,6 +31,6 @@ dev = ["clippy"]
 
 [dependencies]
 farmhash = "1.1.2"
-byteorder = "*"
+byteorder = "0.3.11"
 rand = "0.3"
 clippy = {version = "0.0.6", optional = true}
