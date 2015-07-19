@@ -9,14 +9,14 @@ pub fn get_hash(data: &[u8]) -> Vec<u8> {
     let hash32 = farmhash::hash32(data);
     let mut hash = vec![];
     hash.write_u32::<BigEndian>(hash32).unwrap();
-    return hash;
+    hash
 }
 
 pub fn get_alt_index(fp: &Fingerprint, i: usize) -> usize {
     let hash = get_hash(&[fp.0]);
     let mut rdr = Cursor::new(hash);
     let alt_i = rdr.read_u32::<BigEndian>().unwrap() as usize;
-    return (i ^ alt_i) as usize;
+    (i ^ alt_i) as usize
 }
 
 pub struct FaI {
@@ -31,7 +31,7 @@ pub fn get_fai(data: &[u8]) -> FaI {
     let mut rdr = Cursor::new(hash);
     let i1 = rdr.read_u32::<BigEndian>().unwrap() as usize;
     let i2 = get_alt_index(&f, i1);
-    return FaI {
+    FaI {
         fp: f, i1: i1, i2: i2
     }
 }
