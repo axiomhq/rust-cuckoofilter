@@ -1,5 +1,5 @@
-pub const FINGERPRINT_SIZE: usize = 2;
-pub const BUCKET_SIZE: usize = 8;
+pub const FINGERPRINT_SIZE: usize = 1;
+pub const BUCKET_SIZE: usize = 4;
 const EMPTY_FINGERPRINT_DATA: [u8; FINGERPRINT_SIZE] = [100; FINGERPRINT_SIZE];
 
 // Fingerprint Size is 1 byte so lets remove the Vec
