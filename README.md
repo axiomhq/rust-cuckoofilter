@@ -18,28 +18,24 @@ extern crate cuckoofilter;
 
 let value: &str = "hello world";
 
-// Create cuckoo filter with max capacity of 1000000 items
-let cf = cuckoofilter::new(1000000);
+// Create cuckoo filter with default max capacity of 1000000 items
+let mut cf = cuckoofilter::new();
 
 // Add data to the filter
-let success = cf.add(&value.as_bytes());
+let success = cf.add(value);
 // success ==> true
 
 // Lookup if data is in the filter
-let success = cf.lookup(&value.as_bytes());
+let success = cf.contains(value);
 // success ==> true
 
 // Test and add to the filter (if data does not exists then add)
-let success = cf.test_and_add(&value.as_bytes());
+let success = cf.test_and_add(value);
 // success ==> false
 
 // Remove data from the filter.
-let success = cf.delete(&value.as_bytes());
+let success = cf.delete(value);
 // success ==> true
-
-// Lookup if data is in the filter
-let success = cf.lookup(&value.as_bytes());
-// success ==> false
 ```
 
 
