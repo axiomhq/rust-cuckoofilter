@@ -23,48 +23,62 @@ mod bucket;
 mod util;
 
 extern crate rand;
+extern crate farmhash;
+extern crate byteorder;
 
+use farmhash::{FarmHasher};
 use bucket::{Bucket, Fingerprint, BUCKET_SIZE};
 use util::{get_fai, get_alt_index, FaI};
-use rand::Rng;
-use std::iter::repeat;
+use rand::{Rng};
+use std::iter::{repeat};
+use std::hash::{Hasher, Hash};
+use std::marker::{PhantomData};
 
 pub const MAX_REBUCKET: usize = 500;
 
 // A cuckoo filter class exposes a Bloomier filter interface,
 // providing methods of add, delete, contains.
-pub struct CuckooFilter {
-    buckets: Vec<Bucket>,
+pub struct CuckooFilter<H = FarmHasher> {
+    buckets: Box<[Bucket]>,
     len: u64,
+    _hasher: std::marker::PhantomData<H>,
 }
 
-impl CuckooFilter {
-    /// Constructs a Cockoo Filter with default capacity
-    pub fn new() -> CuckooFilter {
-        Self::default()
-    }
+impl CuckooFilter<FarmHasher> {
+  /// Constructs a Cockoo Filter with default capacity and hasher.
+  pub fn new() -> CuckooFilter<FarmHasher> {
+    Self::with_capacity(1000000)
+  }
+}
 
+impl<H> CuckooFilter<H>
+  where H: Hasher + Default
+{
     /// Constructs a Cuckoo Filter with a given max capacity
-    pub fn with_capacity(cap: u64) -> CuckooFilter {
+    pub fn with_capacity(cap: u64) -> CuckooFilter<H> {
         let capacity = match cap.next_power_of_two()/BUCKET_SIZE as u64 {
             0 => 1,
             cap => cap,
         };
 
         CuckooFilter {
-            buckets: repeat(Bucket::new()).take(capacity as usize).collect(),
+            buckets: repeat(Bucket::new())
+              .take(capacity as usize)
+              .collect::<Vec<_>>()
+              .into_boxed_slice(),
             len: 0,
+            _hasher: PhantomData
         }
     }
 
     /// Returns a Cuckoo Filter with a default max Capacity 1000000 items/
-    pub fn default() -> CuckooFilter {
+    pub fn default() -> CuckooFilter<H> {
         CuckooFilter::with_capacity(1000000)
     }
 
     /// Checks if `data` is in the filter.
-    pub fn contains(&mut self, data: &[u8]) -> bool {
-        let FaI { fp, i1, i2 } = get_fai(data);
+    pub fn contains<T: ?Sized + Hash>(&mut self, data: &T) -> bool {
+        let FaI { fp, i1, i2 } = get_fai::<T, H>(data);
         let len = self.buckets.len();
         let b1 = self.buckets[i1%len].get_fingerprint_index(fp);
         let b2 = self.buckets[i2%len].get_fingerprint_index(fp);
@@ -73,12 +87,9 @@ impl CuckooFilter {
     }
 
     /// Adds `data` to the filter. Returns true if the insertion was successful.
-    pub fn add(&mut self, data: &[u8]) -> bool {
-        let FaI { fp, i1, i2 } = get_fai(data);
-        if self.put(fp, i1) || self.put(fp, i2) {
-            return true;
-        }
-        self.reinsert(fp, i2)
+    pub fn add<T: ?Sized + Hash>(&mut self, data: &T) -> bool {
+        let FaI { fp, i1, i2 } = get_fai::<T, H>(data);
+        self.put(fp, i1) || self.put(fp, i2) || self.reinsert(fp, i2)
     }
 
     /// Adds `data` to the filter if it does not exist in the filter yet.
@@ -86,9 +97,10 @@ impl CuckooFilter {
     /// successfully.
     pub fn test_and_add(&mut self, data: &[u8]) -> bool {
         if self.contains(data) {
-            return false;
+            false
+        } else {
+          self.add(data)
         }
-        self.add(data)
     }
 
     /// Number of items in the filter.
@@ -103,8 +115,8 @@ impl CuckooFilter {
 
     /// Deletes `data` from the filter. Returns true if `data` existed in the
     /// filter before.
-    pub fn delete(&mut self, data: &[u8]) -> bool{
-        let FaI { fp, i1, i2 } = get_fai(data);
+    pub fn delete<T: ?Sized + Hash>(&mut self, data: &T) -> bool{
+        let FaI { fp, i1, i2 } = get_fai::<T, H>(data);
 
         self.remove(fp, i1) || self.remove(fp, i2)
     }
@@ -136,7 +148,7 @@ impl CuckooFilter {
             let len = self.buckets.len();
             fp = self.buckets[i%len].buffer[j];
             self.buckets[i%len].buffer[j] = newfp;
-            i = get_alt_index(&mut fp, i);
+            i = get_alt_index::<H>(&mut fp, i);
             if self.put(fp, i) {
                 return true;
             }
