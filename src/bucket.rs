@@ -5,19 +5,14 @@ const EMPTY_FINGERPRINT_DATA: [u8; FINGERPRINT_SIZE] = [100; FINGERPRINT_SIZE];
 // Fingerprint Size is 1 byte so lets remove the Vec
 #[derive(PartialEq, Copy, Clone, Hash)]
 pub struct Fingerprint {
-  data: [u8; FINGERPRINT_SIZE]
+  pub data: [u8; FINGERPRINT_SIZE]
 }
 
 impl Fingerprint {
   /// Attempts to create a new Fingerprint based on the given
   /// number. If the created Fingerprint would be equal to the
   /// empty Fingerprint, None is returned.
-  pub fn from_usize(mut n: usize) -> Option<Fingerprint> {
-    let mut data = [0; FINGERPRINT_SIZE];
-    for i in 0..FINGERPRINT_SIZE {
-      data[i] = (n & 0xff) as u8;
-      n >>= 8;
-    }
+  pub fn from_data(data: [u8; FINGERPRINT_SIZE]) -> Option<Fingerprint> {
     let result = Fingerprint{ data: data };
     if result.is_empty() { None }
     else { Some(result) }

@@ -42,7 +42,7 @@ fn test_insertion() {
       }
   }
   assert_eq!(cf.len(), insertions);
-  assert_eq!(cf.len(), split.len() as u64);
+  assert_eq!(cf.len(), 234185 as u64);
 
   for s in &split {
       cf.delete(s);
