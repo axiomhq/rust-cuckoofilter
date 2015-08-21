@@ -64,7 +64,7 @@ impl Bucket {
     }
 
     /// Returns the index of the given fingerprint, if its found. O(1)
-    pub fn get_fingerprint_index(&mut self, fp: Fingerprint) -> Option<usize> {
+    pub fn get_fingerprint_index(&self, fp: Fingerprint) -> Option<usize> {
         self.buffer.iter().position(|e| *e == fp)
     }
 }
