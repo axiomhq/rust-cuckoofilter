@@ -80,7 +80,7 @@ impl<H> CuckooFilter<H>
     }
 
     /// Checks if `data` is in the filter.
-    pub fn contains<T: ?Sized + Hash>(&mut self, data: &T) -> bool {
+    pub fn contains<T: ?Sized + Hash>(&self, data: &T) -> bool {
         let FaI { fp, i1, i2 } = get_fai::<T, H>(data);
         let len = self.buckets.len();
         self.buckets[i1%len].get_fingerprint_index(fp).or(
