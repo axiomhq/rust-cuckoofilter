@@ -1,4 +1,4 @@
-use std::hash::{Hasher, Hash, hash};
+use std::hash::{Hasher, Hash};
 use ::byteorder::{BigEndian, WriteBytesExt, ReadBytesExt};
 use ::bucket::{Fingerprint, FINGERPRINT_SIZE};
 

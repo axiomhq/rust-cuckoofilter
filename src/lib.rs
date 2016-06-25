@@ -38,8 +38,45 @@ pub const MAX_REBUCKET: u32 = 500;
 /// The default number of buckets.
 pub const DEFAULT_CAPACITY: u64 = 1 << 20 - 1;
 
-// A cuckoo filter class exposes a Bloomier filter interface,
-// providing methods of add, delete, contains.
+/// A cuckoo filter class exposes a Bloomier filter interface,
+/// providing methods of add, delete, contains.
+///
+/// # Examples
+///
+/// ```
+/// extern crate cuckoofilter;
+///
+/// let words = vec!["foo", "bar", "xylophone", "milagro"];
+/// let mut cf = cuckoofilter::CuckooFilter::new();
+///
+/// let mut insertions = 0;
+/// for s in &words {
+///     if cf.test_and_add(s) {
+///         insertions += 1;
+///     }
+/// }
+///
+/// assert_eq!(insertions, words.len());
+/// assert_eq!(cf.len(), words.len() as u64);
+///
+/// // Re-add the first element.
+/// cf.add(words[0]);
+///
+/// assert_eq!(cf.len(), words.len() as u64 + 1);
+///
+/// for s in &words {
+///     cf.delete(s);
+/// }
+///
+/// assert_eq!(cf.len(), 1);
+/// assert!(!cf.is_empty());
+///
+/// cf.delete(words[0]);
+///
+/// assert_eq!(cf.len(), 0);
+/// assert!(cf.is_empty());
+///
+/// ```
 pub struct CuckooFilter<H> {
     buckets: Box<[Bucket]>,
     len: u64,
