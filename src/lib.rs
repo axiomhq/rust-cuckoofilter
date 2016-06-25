@@ -36,7 +36,7 @@ use std::marker::PhantomData;
 pub const MAX_REBUCKET: u32 = 500;
 
 /// The default number of buckets.
-pub const DEFAULT_CAPACITY: u64 = 1 << 20 - 1;
+pub const DEFAULT_CAPACITY: u64 = (1 << 20) - 1;
 
 /// A cuckoo filter class exposes a Bloomier filter interface,
 /// providing methods of add, delete, contains.

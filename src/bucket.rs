@@ -32,7 +32,7 @@ impl Fingerprint {
     }
 }
 
-/// Manages BUCKET_SIZE fingerprints at most.
+/// Manages `BUCKET_SIZE` fingerprints at most.
 #[derive(Clone)]
 pub struct Bucket {
     pub buffer: [Fingerprint; BUCKET_SIZE],
@@ -47,7 +47,7 @@ impl Bucket {
     /// Inserts the fingerprint into the buffer if the buffer is not full. This
     /// operation is O(1).
     pub fn insert(&mut self, fp: Fingerprint) -> bool {
-        for entry in self.buffer.iter_mut() {
+        for entry in &mut self.buffer {
             if entry.is_empty() {
                 *entry = fp;
                 return true;
