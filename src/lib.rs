@@ -27,10 +27,10 @@ extern crate byteorder;
 
 use bucket::{Bucket, Fingerprint, BUCKET_SIZE};
 use util::{get_fai, get_alt_index, FaI};
-use rand::{Rng};
-use std::iter::{repeat};
+use rand::Rng;
+use std::iter::repeat;
 use std::hash::{SipHasher, Hasher, Hash};
-use std::marker::{PhantomData};
+use std::marker::PhantomData;
 
 /// If insertion fails, we will retry this many times.
 pub const MAX_REBUCKET: u32 = 500;
@@ -47,35 +47,35 @@ pub struct CuckooFilter<H> {
 }
 
 impl Default for CuckooFilter<SipHasher> {
-  fn default() -> Self {
-    CuckooFilter::new()
-  }
+    fn default() -> Self {
+        CuckooFilter::new()
+    }
 }
 
 impl CuckooFilter<SipHasher> {
-  /// Construct a CuckooFilter with default capacity and hasher.
-  pub fn new() -> CuckooFilter<SipHasher> {
-    Self::with_capacity(DEFAULT_CAPACITY)
-  }
+    /// Construct a CuckooFilter with default capacity and hasher.
+    pub fn new() -> CuckooFilter<SipHasher> {
+        Self::with_capacity(DEFAULT_CAPACITY)
+    }
 }
 
 impl<H> CuckooFilter<H>
-  where H: Hasher + Default
+    where H: Hasher + Default
 {
     /// Constructs a Cuckoo Filter with a given max capacity
     pub fn with_capacity(cap: u64) -> CuckooFilter<H> {
-        let capacity = match cap.next_power_of_two()/BUCKET_SIZE as u64 {
+        let capacity = match cap.next_power_of_two() / BUCKET_SIZE as u64 {
             0 => 1,
             cap => cap,
         };
 
         CuckooFilter {
             buckets: repeat(Bucket::new())
-              .take(capacity as usize)
-              .collect::<Vec<_>>()
-              .into_boxed_slice(),
+                .take(capacity as usize)
+                .collect::<Vec<_>>()
+                .into_boxed_slice(),
             len: 0,
-            _hasher: PhantomData
+            _hasher: PhantomData,
         }
     }
 
@@ -83,32 +83,34 @@ impl<H> CuckooFilter<H>
     pub fn contains<T: ?Sized + Hash>(&self, data: &T) -> bool {
         let FaI { fp, i1, i2 } = get_fai::<T, H>(data);
         let len = self.buckets.len();
-        self.buckets[i1%len].get_fingerprint_index(fp).or(
-        self.buckets[i2%len].get_fingerprint_index(fp)).is_some()
+        self.buckets[i1 % len]
+            .get_fingerprint_index(fp)
+            .or(self.buckets[i2 % len].get_fingerprint_index(fp))
+            .is_some()
     }
 
     /// Adds `data` to the filter. Returns true if the insertion was successful.
     pub fn add<T: ?Sized + Hash>(&mut self, data: &T) -> bool {
         let fai = get_fai::<T, H>(data);
         if self.put(fai.fp, fai.i1) || self.put(fai.fp, fai.i2) {
-          return true;
+            return true;
         }
         let len = self.buckets.len();
         let mut rng = rand::thread_rng();
         let mut i = fai.random_index(&mut rng);
         let mut fp = fai.fp;
         for _ in 0..MAX_REBUCKET {
-          let other_fp;
-          {
-            let loc = &mut self.buckets[i % len].buffer[rng.gen_range(0, BUCKET_SIZE)];
-            other_fp = *loc;
-            *loc = fp;
-            i = get_alt_index::<H>(other_fp, i);
-          }
-          if self.put(other_fp, i) {
-            return true;
-          }
-          fp = other_fp;
+            let other_fp;
+            {
+                let loc = &mut self.buckets[i % len].buffer[rng.gen_range(0, BUCKET_SIZE)];
+                other_fp = *loc;
+                *loc = fp;
+                i = get_alt_index::<H>(other_fp, i);
+            }
+            if self.put(other_fp, i) {
+                return true;
+            }
+            fp = other_fp;
         }
         panic!("Map is full, could not insert item");
     }
@@ -120,7 +122,7 @@ impl<H> CuckooFilter<H>
         if self.contains(data) {
             false
         } else {
-          self.add(data)
+            self.add(data)
         }
     }
 
@@ -144,7 +146,7 @@ impl<H> CuckooFilter<H>
     /// Removes the item with the given fingerprint from the bucket indexed by i.
     fn remove(&mut self, fp: Fingerprint, i: usize) -> bool {
         let len = self.buckets.len();
-        if self.buckets[i%len].delete(fp) {
+        if self.buckets[i % len].delete(fp) {
             self.len -= 1;
             true
         } else {
@@ -154,7 +156,7 @@ impl<H> CuckooFilter<H>
 
     fn put(&mut self, fp: Fingerprint, i: usize) -> bool {
         let len = self.buckets.len();
-        if self.buckets[i%len].insert(fp) {
+        if self.buckets[i % len].insert(fp) {
             self.len += 1;
             true
         } else {

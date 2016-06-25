@@ -5,61 +5,65 @@ const EMPTY_FINGERPRINT_DATA: [u8; FINGERPRINT_SIZE] = [100; FINGERPRINT_SIZE];
 // Fingerprint Size is 1 byte so lets remove the Vec
 #[derive(PartialEq, Copy, Clone, Hash)]
 pub struct Fingerprint {
-  pub data: [u8; FINGERPRINT_SIZE]
+    pub data: [u8; FINGERPRINT_SIZE],
 }
 
 impl Fingerprint {
-  /// Attempts to create a new Fingerprint based on the given
-  /// number. If the created Fingerprint would be equal to the
-  /// empty Fingerprint, None is returned.
-  pub fn from_data(data: [u8; FINGERPRINT_SIZE]) -> Option<Fingerprint> {
-    let result = Fingerprint{ data: data };
-    if result.is_empty() { None }
-    else { Some(result) }
-  }
+    /// Attempts to create a new Fingerprint based on the given
+    /// number. If the created Fingerprint would be equal to the
+    /// empty Fingerprint, None is returned.
+    pub fn from_data(data: [u8; FINGERPRINT_SIZE]) -> Option<Fingerprint> {
+        let result = Fingerprint { data: data };
+        if result.is_empty() {
+            None
+        } else {
+            Some(result)
+        }
+    }
 
-  /// Returns the empty Fingerprint.
-  pub fn empty() -> Fingerprint {
-    Fingerprint { data: EMPTY_FINGERPRINT_DATA }
-  }
+    /// Returns the empty Fingerprint.
+    pub fn empty() -> Fingerprint {
+        Fingerprint { data: EMPTY_FINGERPRINT_DATA }
+    }
 
-  /// Checks if this is the empty Fingerprint.
-  pub fn is_empty(&self) -> bool {
-    self.data == EMPTY_FINGERPRINT_DATA
-  }
+    /// Checks if this is the empty Fingerprint.
+    pub fn is_empty(&self) -> bool {
+        self.data == EMPTY_FINGERPRINT_DATA
+    }
 }
 
 /// Manages BUCKET_SIZE fingerprints at most.
 #[derive(Clone)]
 pub struct Bucket {
-    pub buffer: [Fingerprint; BUCKET_SIZE]
+    pub buffer: [Fingerprint; BUCKET_SIZE],
 }
 
 impl Bucket {
     /// Creates a new bucket with a pre-allocated buffer.
     pub fn new() -> Bucket {
-        Bucket {
-            buffer: [Fingerprint::empty(); BUCKET_SIZE]
-        }
+        Bucket { buffer: [Fingerprint::empty(); BUCKET_SIZE] }
     }
 
     /// Inserts the fingerprint into the buffer if the buffer is not full. This
     /// operation is O(1).
     pub fn insert(&mut self, fp: Fingerprint) -> bool {
-      for entry in self.buffer.iter_mut() {
-        if entry.is_empty() {
-          *entry = fp;
-          return true;
+        for entry in self.buffer.iter_mut() {
+            if entry.is_empty() {
+                *entry = fp;
+                return true;
+            }
         }
-      }
-      false
+        false
     }
 
     /// Deletes the given fingerprint from the bucket. This operation is O(1).
     pub fn delete(&mut self, fp: Fingerprint) -> bool {
         match self.get_fingerprint_index(fp) {
-            Some(index) => { self.buffer[index] = Fingerprint::empty(); true }
-            None => false
+            Some(index) => {
+                self.buffer[index] = Fingerprint::empty();
+                true
+            }
+            None => false,
         }
     }
 
