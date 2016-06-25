@@ -1,6 +1,6 @@
 [package]
 name = "cuckoofilter"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Seif Lotfy <seif.lotfy@gmail.com>", "Lukas Kalbertodt <lukas.kalbertodt@gmail.com>"]
 
 
@@ -31,8 +31,8 @@ default = []
 dev = ["clippy"]
 
 [dependencies]
-byteorder = "0.3.11"
+byteorder = "0.5"
 rand = "0.3"
-clippy = {version = "0.0.6", optional = true}
-fnv = {version = "1.0.0", optional = true}
-farmhash = {version = "1.1.2", optional = true}
+clippy = {version = "0.0.77", optional = true}
+fnv = {version = "1.0.2", optional = true}
+farmhash = {version = "1.1", optional = true}
