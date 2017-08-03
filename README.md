@@ -39,5 +39,5 @@ let success = cf.delete(value);
 ```
 
 
-##Note
+## Note
 This implementation uses a a static bucket size of 4 fingerprints and a fingerprint size of 1 byte based on my understanding of an optimal bucket/fingerprint/size ratio from the aforementioned paper.
