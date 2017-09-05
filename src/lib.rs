@@ -29,7 +29,8 @@ use bucket::{Bucket, Fingerprint, BUCKET_SIZE};
 use util::{get_fai, get_alt_index, FaI};
 use rand::Rng;
 use std::iter::repeat;
-use std::hash::{SipHasher, Hasher, Hash};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hasher, Hash};
 use std::marker::PhantomData;
 
 /// If insertion fails, we will retry this many times.
@@ -83,15 +84,15 @@ pub struct CuckooFilter<H> {
     _hasher: std::marker::PhantomData<H>,
 }
 
-impl Default for CuckooFilter<SipHasher> {
+impl Default for CuckooFilter<DefaultHasher> {
     fn default() -> Self {
         CuckooFilter::new()
     }
 }
 
-impl CuckooFilter<SipHasher> {
+impl CuckooFilter<DefaultHasher> {
     /// Construct a CuckooFilter with default capacity and hasher.
-    pub fn new() -> CuckooFilter<SipHasher> {
+    pub fn new() -> CuckooFilter<DefaultHasher> {
         Self::with_capacity(DEFAULT_CAPACITY)
     }
 }

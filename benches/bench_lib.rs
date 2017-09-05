@@ -65,6 +65,6 @@ fn bench_insertion_fnv(b: &mut test::Bencher) {
 }
 
 #[bench]
-fn bench_insertion_sip(b: &mut test::Bencher) {
-    perform_insertions::<std::hash::SipHasher>(b);
+fn bench_insertion_default(b: &mut test::Bencher) {
+    perform_insertions::<std::collections::hash_map::DefaultHasher>(b);
 }
