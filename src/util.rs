@@ -2,6 +2,9 @@ use std::hash::{Hasher, Hash};
 use ::byteorder::{BigEndian, WriteBytesExt};
 use ::bucket::{Fingerprint, FINGERPRINT_SIZE};
 
+// A struct combining *F*ingerprint *a*nd *I*ndexes,
+// to have a return type with named fields
+// instead of a tuple with unnamed fields.
 pub struct FaI {
     pub fp: Fingerprint,
     pub i1: usize,
