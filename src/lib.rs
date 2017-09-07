@@ -129,6 +129,10 @@ impl<H> CuckooFilter<H>
     }
 
     /// Adds `data` to the filter. Returns true if the insertion was successful.
+    /// Note that while you can put any hashable type in the same filter, beware
+    /// for side effects like that the same number can have diferent hashes
+    /// depending on the type.
+    /// So for the filter, 4711i64 isn't the same as 4711u64.
     pub fn add<T: ?Sized + Hash>(&mut self, data: &T) -> bool {
         let fai = get_fai::<T, H>(data);
         if self.put(fai.fp, fai.i1) || self.put(fai.fp, fai.i2) {
