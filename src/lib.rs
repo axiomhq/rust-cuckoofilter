@@ -32,6 +32,7 @@ use std::iter::repeat;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hasher, Hash};
 use std::marker::PhantomData;
+use std::mem;
 
 /// If insertion fails, we will retry this many times.
 pub const MAX_REBUCKET: u32 = 500;
@@ -167,6 +168,11 @@ impl<H> CuckooFilter<H>
     /// Number of items in the filter.
     pub fn len(&self) -> u64 {
         self.len
+    }
+
+    /// Number of bytes the filter occupies in memory
+    pub fn memory_usage(&self) -> usize {
+        mem::size_of_val(self) + self.buckets.len() * mem::size_of::<Bucket>()
     }
 
     /// Check if filter is empty

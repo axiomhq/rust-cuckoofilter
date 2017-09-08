@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Filters now have a memory_usage() function that return how much bytes a given filter occupies in memory.
+  Let's show how little memory the filters need for their capacity!
 ### Changed
 ### Deprecated
 ### Removed
