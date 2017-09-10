@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Use std::collections::hash_map::DefaultHasher as replacement for std::hah::SipHasher as default hasher, as
   SipHasher is deprecated since Rust 1.13.
+- The same part of the item hash was used for generating the fingerprint as well as the index positions. This means that
+  equal fingerprints always had the same index positions, resulting in increased rebucketing and less items fitting in
+  the filter.
 ### Security
 
 [Unreleased]: https://github.com/seiflotfy/rust-cuckoofilter/compare/v0.3.1...HEAD
