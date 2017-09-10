@@ -7,7 +7,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! cuckoofilter = "0.1"
+//! cuckoofilter = "0.3"
 //! ```
 //!
 //! And this in your crate root:
