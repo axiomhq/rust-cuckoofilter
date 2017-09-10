@@ -27,16 +27,16 @@ let value: &str = "hello world";
 let mut cf = cuckoofilter::new();
 
 // Add data to the filter
-let success = cf.add(value);
-// success ==> true
+let success = cf.add(value).unwrap();
+// success ==> Ok(())
 
 // Lookup if data is in the filter
 let success = cf.contains(value);
 // success ==> true
 
 // Test and add to the filter (if data does not exists then add)
-let success = cf.test_and_add(value);
-// success ==> false
+let success = cf.test_and_add(value).unwrap();
+// success ==> Ok(false)
 
 // Remove data from the filter.
 let success = cf.delete(value);
