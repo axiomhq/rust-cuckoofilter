@@ -12,13 +12,10 @@ pub struct FaI {
 }
 
 fn get_hash<T: ?Sized + Hash, H: Hasher + Default>(data: &T) -> (u32, u32) {
-    let result: u64;
-    // TODO: why the additional scope?
-    {
-        let mut hasher = <H as Default>::default();
-        data.hash(&mut hasher);
-        result = hasher.finish();
-    }
+    let mut hasher = <H as Default>::default();
+    data.hash(&mut hasher);
+    let result = hasher.finish();
+
     // split 64bit hash value in the upper and the lower 32bit parts,
     // one used for the fingerprint, the other used for the indexes.
     ((result >> 32) as u32, result as u32)
