@@ -33,12 +33,31 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hasher, Hash};
 use std::marker::PhantomData;
 use std::mem;
+use std::fmt;
+use std::error::Error as StdError;
 
 /// If insertion fails, we will retry this many times.
 pub const MAX_REBUCKET: u32 = 500;
 
 /// The default number of buckets.
 pub const DEFAULT_CAPACITY: u64 = (1 << 20) - 1;
+
+#[derive(Debug)]
+pub enum CuckooError {
+    NotEnoughSpace
+}
+
+impl fmt::Display for CuckooError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str("NotEnoughSpace")
+    }
+}
+
+impl StdError  for CuckooError {
+    fn description(&self) -> &str {
+        "Not enough space to store this item, rebucketing failed."
+    }
+}
 
 /// A cuckoo filter class exposes a Bloomier filter interface,
 /// providing methods of add, delete, contains.
@@ -53,7 +72,7 @@ pub const DEFAULT_CAPACITY: u64 = (1 << 20) - 1;
 ///
 /// let mut insertions = 0;
 /// for s in &words {
-///     if cf.test_and_add(s) {
+///     if cf.test_and_add(s).unwrap() {
 ///         insertions += 1;
 ///     }
 /// }
@@ -128,15 +147,17 @@ impl<H> CuckooFilter<H>
             .is_some()
     }
 
-    /// Adds `data` to the filter. Returns true if the insertion was successful.
+    /// Adds `data` to the filter. Returns `Ok` if the insertion was successful,
+    /// but could fail with a `NotEnoughSpace` error, especially when the filter
+    /// is nearing its capacity.
     /// Note that while you can put any hashable type in the same filter, beware
     /// for side effects like that the same number can have diferent hashes
     /// depending on the type.
     /// So for the filter, 4711i64 isn't the same as 4711u64.
-    pub fn add<T: ?Sized + Hash>(&mut self, data: &T) -> bool {
+    pub fn add<T: ?Sized + Hash>(&mut self, data: &T) -> Result<(), CuckooError> {
         let fai = get_fai::<T, H>(data);
         if self.put(fai.fp, fai.i1) || self.put(fai.fp, fai.i2) {
-            return true;
+            return Ok(());
         }
         let len = self.buckets.len();
         let mut rng = rand::thread_rng();
@@ -151,21 +172,24 @@ impl<H> CuckooFilter<H>
                 i = get_alt_index::<H>(other_fp, i);
             }
             if self.put(other_fp, i) {
-                return true;
+                return Ok(());
             }
             fp = other_fp;
         }
-        panic!("Map is full, could not insert item");
+        Err(CuckooError::NotEnoughSpace)
     }
 
     /// Adds `data` to the filter if it does not exist in the filter yet.
-    /// Returns `true` if `data` was not yet present in the filter and added
+    /// Returns `Ok(true)` if `data` was not yet present in the filter and added
     /// successfully.
-    pub fn test_and_add<T: ?Sized + Hash>(&mut self, data: &T) -> bool {
+    pub fn test_and_add<T: ?Sized + Hash>(&mut self, data: &T) -> Result<bool, CuckooError> {
         if self.contains(data) {
-            false
+            Ok(false)
         } else {
-            self.add(data)
+            match self.add(data) {
+                Ok(_) => Ok(true),
+                Err(e) => Err(e),
+            }
         }
     }
 

@@ -16,10 +16,9 @@ fn false_positive_rate() {
     // We might not be able to get all items in, but still there should be enough
     // so we can just use what has fit in and continue with the test.
     for i in 0..total_items {
-        if filter.add(&i) {
-            num_inserted += 1;
-        } else {
-            break;
+        match filter.add(&i) {
+            Ok(_) => num_inserted += 1,
+            Err(_) => break,
         }
     }
 
