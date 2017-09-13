@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - add() now returns Result<(), CuckooError> instead of a bool, and returns a NotEnoughSpaceError instead of panicking
   when insertion fails.
+- len() now returns usize instead of u64 to match std's data structures' len() functions.
 ### Deprecated
 ### Removed
 ### Fixed

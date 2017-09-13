@@ -78,12 +78,12 @@ impl StdError  for CuckooError {
 /// }
 ///
 /// assert_eq!(insertions, words.len());
-/// assert_eq!(cf.len(), words.len() as u64);
+/// assert_eq!(cf.len(), words.len());
 ///
 /// // Re-add the first element.
 /// cf.add(words[0]);
 ///
-/// assert_eq!(cf.len(), words.len() as u64 + 1);
+/// assert_eq!(cf.len(), words.len() + 1);
 ///
 /// for s in &words {
 ///     cf.delete(s);
@@ -100,7 +100,7 @@ impl StdError  for CuckooError {
 /// ```
 pub struct CuckooFilter<H> {
     buckets: Box<[Bucket]>,
-    len: u64,
+    len: usize,
     _hasher: std::marker::PhantomData<H>,
 }
 
@@ -194,7 +194,7 @@ impl<H> CuckooFilter<H>
     }
 
     /// Number of items in the filter.
-    pub fn len(&self) -> u64 {
+    pub fn len(&self) -> usize {
         self.len
     }
 
