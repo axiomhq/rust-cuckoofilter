@@ -40,7 +40,7 @@ use std::error::Error as StdError;
 pub const MAX_REBUCKET: u32 = 500;
 
 /// The default number of buckets.
-pub const DEFAULT_CAPACITY: u64 = (1 << 20) - 1;
+pub const DEFAULT_CAPACITY: usize = (1 << 20) - 1;
 
 #[derive(Debug)]
 pub enum CuckooError {
@@ -121,15 +121,15 @@ impl<H> CuckooFilter<H>
     where H: Hasher + Default
 {
     /// Constructs a Cuckoo Filter with a given max capacity
-    pub fn with_capacity(cap: u64) -> CuckooFilter<H> {
-        let capacity = match cap.next_power_of_two() / BUCKET_SIZE as u64 {
+    pub fn with_capacity(cap: usize) -> CuckooFilter<H> {
+        let capacity = match cap.next_power_of_two() / BUCKET_SIZE {
             0 => 1,
             cap => cap,
         };
 
         CuckooFilter {
             buckets: repeat(Bucket::new())
-                .take(capacity as usize)
+                .take(capacity)
                 .collect::<Vec<_>>()
                 .into_boxed_slice(),
             len: 0,
