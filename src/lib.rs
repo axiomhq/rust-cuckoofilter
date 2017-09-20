@@ -40,7 +40,7 @@ use std::error::Error as StdError;
 pub const MAX_REBUCKET: u32 = 500;
 
 /// The default number of buckets.
-pub const DEFAULT_CAPACITY: u64 = (1 << 20) - 1;
+pub const DEFAULT_CAPACITY: usize = (1 << 20) - 1;
 
 #[derive(Debug)]
 pub enum CuckooError {
@@ -78,12 +78,12 @@ impl StdError  for CuckooError {
 /// }
 ///
 /// assert_eq!(insertions, words.len());
-/// assert_eq!(cf.len(), words.len() as u64);
+/// assert_eq!(cf.len(), words.len());
 ///
 /// // Re-add the first element.
 /// cf.add(words[0]);
 ///
-/// assert_eq!(cf.len(), words.len() as u64 + 1);
+/// assert_eq!(cf.len(), words.len() + 1);
 ///
 /// for s in &words {
 ///     cf.delete(s);
@@ -100,7 +100,7 @@ impl StdError  for CuckooError {
 /// ```
 pub struct CuckooFilter<H> {
     buckets: Box<[Bucket]>,
-    len: u64,
+    len: usize,
     _hasher: std::marker::PhantomData<H>,
 }
 
@@ -121,15 +121,15 @@ impl<H> CuckooFilter<H>
     where H: Hasher + Default
 {
     /// Constructs a Cuckoo Filter with a given max capacity
-    pub fn with_capacity(cap: u64) -> CuckooFilter<H> {
-        let capacity = match cap.next_power_of_two() / BUCKET_SIZE as u64 {
+    pub fn with_capacity(cap: usize) -> CuckooFilter<H> {
+        let capacity = match cap.next_power_of_two() / BUCKET_SIZE {
             0 => 1,
             cap => cap,
         };
 
         CuckooFilter {
             buckets: repeat(Bucket::new())
-                .take(capacity as usize)
+                .take(capacity)
                 .collect::<Vec<_>>()
                 .into_boxed_slice(),
             len: 0,
@@ -194,7 +194,7 @@ impl<H> CuckooFilter<H>
     }
 
     /// Number of items in the filter.
-    pub fn len(&self) -> u64 {
+    pub fn len(&self) -> usize {
         self.len
     }
 

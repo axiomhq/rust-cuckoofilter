@@ -36,7 +36,7 @@ fn get_words() -> String {
 fn perform_insertions<H: std::hash::Hasher + Default>(b: &mut test::Bencher) {
     let contents = get_words();
     let split: Vec<&str> = contents.split("\n").take(1000).collect();
-    let mut cf = CuckooFilter::<H>::with_capacity((split.len() * 2) as u64);
+    let mut cf = CuckooFilter::<H>::with_capacity(split.len() * 2);
 
     b.iter(|| {
         for s in &split {
