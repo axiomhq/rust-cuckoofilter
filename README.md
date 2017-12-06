@@ -44,5 +44,7 @@ let success = cf.delete(value);
 ```
 
 
-## Note
-This implementation uses a a static bucket size of 4 fingerprints and a fingerprint size of 1 byte based on my understanding of an optimal bucket/fingerprint/size ratio from the aforementioned paper.
+## Notes & TODOs
+* This implementation uses a a static bucket size of 4 fingerprints and a fingerprint size of 1 byte based on my understanding of an optimal bucket/fingerprint/size ratio from the aforementioned paper.
+* When the filter returns `NotEnoughSpace`, the element given is actually added to the filter, but some random *other*
+  element gets removed. This could be improved by implementing a single-item eviction cache for that removed item.
