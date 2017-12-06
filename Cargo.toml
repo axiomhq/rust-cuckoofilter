@@ -1,6 +1,6 @@
 [package]
 name = "cuckoofilter"
-version = "0.3.2"
+version = "0.4.0"
 authors = ["Seif Lotfy <seif.lotfy@gmail.com>", "Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Florian Jacob <accounts+git@florianjacob.de>"]
 
 # A short blurb about the package. This is not rendered in any format when
@@ -30,7 +30,7 @@ default = []
 dev = ["clippy"]
 
 [dependencies]
-byteorder = "0.5"
+byteorder = "1.2"
 rand = "0.3"
 clippy = {version = "0.0.77", optional = true}
 fnv = {version = "1.0.2", optional = true}
