@@ -44,7 +44,7 @@ pub const DEFAULT_CAPACITY: usize = (1 << 20) - 1;
 
 #[derive(Debug)]
 pub enum CuckooError {
-    NotEnoughSpace
+    NotEnoughSpace,
 }
 
 impl fmt::Display for CuckooError {
@@ -53,7 +53,7 @@ impl fmt::Display for CuckooError {
     }
 }
 
-impl StdError  for CuckooError {
+impl StdError for CuckooError {
     fn description(&self) -> &str {
         "Not enough space to store this item, rebucketing failed."
     }
@@ -118,7 +118,8 @@ impl CuckooFilter<DefaultHasher> {
 }
 
 impl<H> CuckooFilter<H>
-    where H: Hasher + Default
+where
+    H: Hasher + Default,
 {
     /// Constructs a Cuckoo Filter with a given max capacity
     pub fn with_capacity(cap: usize) -> CuckooFilter<H> {
@@ -133,6 +134,21 @@ impl<H> CuckooFilter<H>
                 .collect::<Vec<_>>()
                 .into_boxed_slice(),
             len: 0,
+            _hasher: PhantomData,
+        }
+    }
+
+    /// Reconstructs a Cuckoo Filter with a given set of bucket `values` previously
+    /// obtained via `export` and the `length` of the previous filter from `len`.
+    pub fn recover(values: Vec<u8>, length: usize) -> CuckooFilter<H> {
+        // Assumes that the `BUCKET_SIZE` and `FINGERPRINT_SIZE` constants do not change.
+        CuckooFilter {
+            buckets: values
+                .chunks(BUCKET_SIZE)
+                .map(|buffers| Bucket::recover(buffers))
+                .collect::<Vec<_>>()
+                .into_boxed_slice(),
+            len: length,
             _hasher: PhantomData,
         }
     }
@@ -196,6 +212,16 @@ impl<H> CuckooFilter<H>
     /// Number of items in the filter.
     pub fn len(&self) -> usize {
         self.len
+    }
+
+    /// Exports fingerprints in all buckets for storage. The filter can be recovered
+    /// by passing this vector through `recover` along with the length of the filter
+    /// (obtained via `len`).
+    pub fn export(&self) -> Vec<u8> {
+        self.buckets
+            .iter()
+            .flat_map(|b| b.get_fingerprint_data().into_iter())
+            .collect()
     }
 
     /// Number of bytes the filter occupies in memory

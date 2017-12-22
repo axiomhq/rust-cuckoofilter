@@ -1,6 +1,6 @@
 use std::hash::{Hasher, Hash};
-use ::byteorder::{BigEndian, WriteBytesExt};
-use ::bucket::{Fingerprint, FINGERPRINT_SIZE};
+use byteorder::{BigEndian, WriteBytesExt};
+use bucket::{Fingerprint, FINGERPRINT_SIZE};
 
 // A struct combining *F*ingerprint *a*nd *I*ndexes,
 // to have a return type with named fields
@@ -60,11 +60,7 @@ impl FaI {
     }
 
     pub fn random_index<R: ::rand::Rng>(&self, r: &mut R) -> usize {
-        if r.gen() {
-            self.i1
-        } else {
-            self.i2
-        }
+        if r.gen() { self.i1 } else { self.i2 }
     }
 }
 
