@@ -154,6 +154,10 @@ impl<H> CuckooFilter<H>
     /// for side effects like that the same number can have diferent hashes
     /// depending on the type.
     /// So for the filter, 4711i64 isn't the same as 4711u64.
+    ///
+    /// **Note:** When this returns `NotEnoughSpace`, the element given was
+    /// actually added to the filter, but some random *other* element was
+    /// removed. This might improve in the future.
     pub fn add<T: ?Sized + Hash>(&mut self, data: &T) -> Result<(), CuckooError> {
         let fai = get_fai::<T, H>(data);
         if self.put(fai.fp, fai.i1) || self.put(fai.fp, fai.i2) {
@@ -176,6 +180,13 @@ impl<H> CuckooFilter<H>
             }
             fp = other_fp;
         }
+        // fp is dropped here, which means that the last item that was
+        // rebucketed gets removed from the filter.
+        // TODO: One could introduce a single-item cache for this element,
+        // check this cache in all methods additionally to the actual filter,
+        // and return NotEnoughSpace if that cache is already in use.
+        // This would complicate the code, but stop random elements from
+        // getting removed and result in nicer behaviour for the user.
         Err(CuckooError::NotEnoughSpace)
     }
 
