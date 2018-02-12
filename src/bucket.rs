@@ -1,3 +1,5 @@
+use std::convert::From;
+
 pub const FINGERPRINT_SIZE: usize = 1;
 pub const BUCKET_SIZE: usize = 4;
 const EMPTY_FINGERPRINT_DATA: [u8; FINGERPRINT_SIZE] = [100; FINGERPRINT_SIZE];
@@ -21,21 +23,23 @@ impl Fingerprint {
         }
     }
 
-    /// Sets the fingerprint value to a previously exported one.
-    pub fn recover(&mut self, fingerprint: &[u8]) {
-        self.data.copy_from_slice(fingerprint);
-    }
     /// Returns the empty Fingerprint.
     pub fn empty() -> Fingerprint {
-        Fingerprint { data: EMPTY_FINGERPRINT_DATA }
+        Fingerprint {
+            data: EMPTY_FINGERPRINT_DATA,
+        }
     }
 
     /// Checks if this is the empty Fingerprint.
     pub fn is_empty(&self) -> bool {
         self.data == EMPTY_FINGERPRINT_DATA
     }
-}
 
+    /// Sets the fingerprint value to a previously exported one via an in-memory copy.
+    fn slice_copy(&mut self, fingerprint: &[u8]) {
+        self.data.copy_from_slice(fingerprint);
+    }
+}
 
 /// Manages `BUCKET_SIZE` fingerprints at most.
 #[derive(Clone)]
@@ -46,16 +50,9 @@ pub struct Bucket {
 impl Bucket {
     /// Creates a new bucket with a pre-allocated buffer.
     pub fn new() -> Bucket {
-        Bucket { buffer: [Fingerprint::empty(); BUCKET_SIZE] }
-    }
-
-    /// Recreates a bucket from previously exported values.
-    pub fn recover(fingerprints: &[u8]) -> Bucket {
-        let mut buffer = [Fingerprint::empty(); BUCKET_SIZE];
-        for (idx, value) in fingerprints.chunks(FINGERPRINT_SIZE).enumerate() {
-            buffer[idx].recover(value);
+        Bucket {
+            buffer: [Fingerprint::empty(); BUCKET_SIZE],
         }
-        Bucket { buffer: buffer }
     }
 
     /// Inserts the fingerprint into the buffer if the buffer is not full.
@@ -93,5 +90,16 @@ impl Bucket {
             .flat_map(|f| f.data.into_iter())
             .map(|&f| f)
             .collect()
+    }
+}
+
+impl<'a> From<&'a [u8]> for Bucket {
+    /// Constructs a buffer of fingerprints from a set of previously exported fingerprints.
+    fn from(fingerprints: &'a [u8]) -> Self {
+        let mut buffer = [Fingerprint::empty(); BUCKET_SIZE];
+        for (idx, value) in fingerprints.chunks(FINGERPRINT_SIZE).enumerate() {
+            buffer[idx].slice_copy(value);
+        }
+        Bucket { buffer: buffer }
     }
 }

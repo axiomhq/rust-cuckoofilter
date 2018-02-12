@@ -1,4 +1,4 @@
-use std::hash::{Hasher, Hash};
+use std::hash::{Hash, Hasher};
 use byteorder::{BigEndian, WriteBytesExt};
 use bucket::{Fingerprint, FINGERPRINT_SIZE};
 
@@ -60,7 +60,11 @@ impl FaI {
     }
 
     pub fn random_index<R: ::rand::Rng>(&self, r: &mut R) -> usize {
-        if r.gen() { self.i1 } else { self.i2 }
+        if r.gen() {
+            self.i1
+        } else {
+            self.i2
+        }
     }
 }
 

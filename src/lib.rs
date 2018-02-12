@@ -22,19 +22,23 @@
 mod bucket;
 mod util;
 
-extern crate rand;
 extern crate byteorder;
+extern crate rand;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
 
 use bucket::{Bucket, Fingerprint, BUCKET_SIZE};
-use util::{get_fai, get_alt_index, FaI};
+use util::{get_alt_index, get_fai, FaI};
 use rand::Rng;
 use std::iter::repeat;
 use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hasher, Hash};
+use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
 use std::mem;
 use std::fmt;
 use std::error::Error as StdError;
+use std::convert::From;
 
 /// If insertion fails, we will retry this many times.
 pub const MAX_REBUCKET: u32 = 500;
@@ -138,21 +142,6 @@ where
         }
     }
 
-    /// Reconstructs a Cuckoo Filter with a given set of bucket `values` previously
-    /// obtained via `export` and the `length` of the previous filter from `len`.
-    pub fn recover(values: Vec<u8>, length: usize) -> CuckooFilter<H> {
-        // Assumes that the `BUCKET_SIZE` and `FINGERPRINT_SIZE` constants do not change.
-        CuckooFilter {
-            buckets: values
-                .chunks(BUCKET_SIZE)
-                .map(|buffers| Bucket::recover(buffers))
-                .collect::<Vec<_>>()
-                .into_boxed_slice(),
-            len: length,
-            _hasher: PhantomData,
-        }
-    }
-
     /// Checks if `data` is in the filter.
     pub fn contains<T: ?Sized + Hash>(&self, data: &T) -> bool {
         let FaI { fp, i1, i2 } = get_fai::<T, H>(data);
@@ -214,14 +203,11 @@ where
         self.len
     }
 
-    /// Exports fingerprints in all buckets for storage. The filter can be recovered
-    /// by passing this vector through `recover` along with the length of the filter
-    /// (obtained via `len`).
-    pub fn export(&self) -> Vec<u8> {
-        self.buckets
-            .iter()
-            .flat_map(|b| b.get_fingerprint_data().into_iter())
-            .collect()
+    /// Exports fingerprints in all buckets, along with the filter's length for storage.
+    /// The filter can be recovered by passing the `ExportedCuckooFilter` struct to the
+    /// `from` method of `CuckooFilter`.
+    pub fn export(&self) -> ExportedCuckooFilter {
+        self.into()
     }
 
     /// Number of bytes the filter occupies in memory
@@ -239,6 +225,14 @@ where
     pub fn delete<T: ?Sized + Hash>(&mut self, data: &T) -> bool {
         let FaI { fp, i1, i2 } = get_fai::<T, H>(data);
         self.remove(fp, i1) || self.remove(fp, i2)
+    }
+
+    /// Extracts fingerprint values from all buckets, used for exporting the filters data.
+    fn values(&self) -> Vec<u8> {
+        self.buckets
+            .iter()
+            .flat_map(|b| b.get_fingerprint_data().into_iter())
+            .collect()
     }
 
     /// Removes the item with the given fingerprint from the bucket indexed by i.
@@ -259,6 +253,45 @@ where
             true
         } else {
             false
+        }
+    }
+}
+
+/// A minimal representation of the CuckooFilter which can be transfered or stored, then recovered at a later stage.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ExportedCuckooFilter {
+    pub values: Vec<u8>,
+    pub length: usize,
+}
+
+impl<H> From<ExportedCuckooFilter> for CuckooFilter<H> {
+    /// Converts a simplified representation of a filter used for export to a
+    /// fully functioning version.
+    fn from(exported: ExportedCuckooFilter) -> CuckooFilter<H> {
+        // Assumes that the `BUCKET_SIZE` and `FINGERPRINT_SIZE` constants do not change.
+        CuckooFilter {
+            buckets: exported
+                .values
+                .chunks(BUCKET_SIZE)
+                .map(|buffers| Bucket::from(buffers))
+                .collect::<Vec<_>>()
+                .into_boxed_slice(),
+            len: exported.length,
+            _hasher: PhantomData,
+        }
+    }
+}
+
+impl<'a, H> From<&'a CuckooFilter<H>> for ExportedCuckooFilter
+where
+    H: Hasher + Default,
+{
+    /// Converts a `CuckooFilter` into a simplified version which can be serialized and stored
+    /// for later use.
+    fn from(cuckoo: &'a CuckooFilter<H>) -> ExportedCuckooFilter {
+        ExportedCuckooFilter {
+            values: cuckoo.values(),
+            length: cuckoo.len(),
         }
     }
 }
