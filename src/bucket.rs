@@ -88,7 +88,7 @@ impl Bucket {
         self.buffer
             .iter()
             .flat_map(|f| f.data.into_iter())
-            .map(|&f| f)
+            .cloned()
             .collect()
     }
 }
