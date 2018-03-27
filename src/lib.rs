@@ -267,6 +267,15 @@ pub struct ExportedCuckooFilter {
 impl<H> From<ExportedCuckooFilter> for CuckooFilter<H> {
     /// Converts a simplified representation of a filter used for export to a
     /// fully functioning version.
+    ///
+    /// # Contents
+    ///
+    /// * `values` - A serialized version of the `CuckooFilter`'s memory, where the
+    /// fingerprints in each bucket are chained one after another, then in turn all
+    /// buckets are chained together.
+    /// * `length` - The number of valid fingerprints inside the `CuckooFilter`.
+    /// This value is used as a time saving method, otherwise all fingerprints
+    /// would need to be checked for equivalence against the null pattern.
     fn from(exported: ExportedCuckooFilter) -> CuckooFilter<H> {
         // Assumes that the `BUCKET_SIZE` and `FINGERPRINT_SIZE` constants do not change.
         CuckooFilter {
