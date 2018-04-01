@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [v0.4.0] - Unreleased
 ### Added
+- `ExportedCuckooFilter` adds the ability to serialize the memory map of a `CuckooFilter` via Serde; reducing communication overhead between nodes for example, or the ability to store the current state on disk for retrieval at a later time.
 ### Changed
 - add() now returns Result<(), CuckooError> instead of a bool, and returns a NotEnoughSpaceError instead of panicking
   when insertion fails.

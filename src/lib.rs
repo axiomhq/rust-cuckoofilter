@@ -22,19 +22,23 @@
 mod bucket;
 mod util;
 
-extern crate rand;
 extern crate byteorder;
+extern crate rand;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
 
 use bucket::{Bucket, Fingerprint, BUCKET_SIZE};
-use util::{get_fai, get_alt_index, FaI};
+use util::{get_alt_index, get_fai, FaI};
 use rand::Rng;
 use std::iter::repeat;
 use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hasher, Hash};
+use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
 use std::mem;
 use std::fmt;
 use std::error::Error as StdError;
+use std::convert::From;
 
 /// If insertion fails, we will retry this many times.
 pub const MAX_REBUCKET: u32 = 500;
@@ -44,7 +48,7 @@ pub const DEFAULT_CAPACITY: usize = (1 << 20) - 1;
 
 #[derive(Debug)]
 pub enum CuckooError {
-    NotEnoughSpace
+    NotEnoughSpace,
 }
 
 impl fmt::Display for CuckooError {
@@ -53,7 +57,7 @@ impl fmt::Display for CuckooError {
     }
 }
 
-impl StdError  for CuckooError {
+impl StdError for CuckooError {
     fn description(&self) -> &str {
         "Not enough space to store this item, rebucketing failed."
     }
@@ -118,7 +122,8 @@ impl CuckooFilter<DefaultHasher> {
 }
 
 impl<H> CuckooFilter<H>
-    where H: Hasher + Default
+where
+    H: Hasher + Default,
 {
     /// Constructs a Cuckoo Filter with a given max capacity
     pub fn with_capacity(cap: usize) -> CuckooFilter<H> {
@@ -209,6 +214,13 @@ impl<H> CuckooFilter<H>
         self.len
     }
 
+    /// Exports fingerprints in all buckets, along with the filter's length for storage.
+    /// The filter can be recovered by passing the `ExportedCuckooFilter` struct to the
+    /// `from` method of `CuckooFilter`.
+    pub fn export(&self) -> ExportedCuckooFilter {
+        self.into()
+    }
+
     /// Number of bytes the filter occupies in memory
     pub fn memory_usage(&self) -> usize {
         mem::size_of_val(self) + self.buckets.len() * mem::size_of::<Bucket>()
@@ -224,6 +236,14 @@ impl<H> CuckooFilter<H>
     pub fn delete<T: ?Sized + Hash>(&mut self, data: &T) -> bool {
         let FaI { fp, i1, i2 } = get_fai::<T, H>(data);
         self.remove(fp, i1) || self.remove(fp, i2)
+    }
+
+    /// Extracts fingerprint values from all buckets, used for exporting the filters data.
+    fn values(&self) -> Vec<u8> {
+        self.buckets
+            .iter()
+            .flat_map(|b| b.get_fingerprint_data().into_iter())
+            .collect()
     }
 
     /// Removes the item with the given fingerprint from the bucket indexed by i.
@@ -244,6 +264,54 @@ impl<H> CuckooFilter<H>
             true
         } else {
             false
+        }
+    }
+}
+
+/// A minimal representation of the CuckooFilter which can be transfered or stored, then recovered at a later stage.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ExportedCuckooFilter {
+    pub values: Vec<u8>,
+    pub length: usize,
+}
+
+impl<H> From<ExportedCuckooFilter> for CuckooFilter<H> {
+    /// Converts a simplified representation of a filter used for export to a
+    /// fully functioning version.
+    ///
+    /// # Contents
+    ///
+    /// * `values` - A serialized version of the `CuckooFilter`'s memory, where the
+    /// fingerprints in each bucket are chained one after another, then in turn all
+    /// buckets are chained together.
+    /// * `length` - The number of valid fingerprints inside the `CuckooFilter`.
+    /// This value is used as a time saving method, otherwise all fingerprints
+    /// would need to be checked for equivalence against the null pattern.
+    fn from(exported: ExportedCuckooFilter) -> CuckooFilter<H> {
+        // Assumes that the `BUCKET_SIZE` and `FINGERPRINT_SIZE` constants do not change.
+        CuckooFilter {
+            buckets: exported
+                .values
+                .chunks(BUCKET_SIZE)
+                .map(|buffers| Bucket::from(buffers))
+                .collect::<Vec<_>>()
+                .into_boxed_slice(),
+            len: exported.length,
+            _hasher: PhantomData,
+        }
+    }
+}
+
+impl<'a, H> From<&'a CuckooFilter<H>> for ExportedCuckooFilter
+where
+    H: Hasher + Default,
+{
+    /// Converts a `CuckooFilter` into a simplified version which can be serialized and stored
+    /// for later use.
+    fn from(cuckoo: &'a CuckooFilter<H>) -> ExportedCuckooFilter {
+        ExportedCuckooFilter {
+            values: cuckoo.values(),
+            length: cuckoo.len(),
         }
     }
 }
