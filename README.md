@@ -43,8 +43,14 @@ let success = cf.delete(value);
 // success ==> true
 ```
 
+## C Interface
+This crate has a C interface for embedding it into other languages than Rust.
+See the [C Interface Documentation](https://docs.rs/cuckoofilter_cabi) for more details.
+
 
 ## Notes & TODOs
 * This implementation uses a a static bucket size of 4 fingerprints and a fingerprint size of 1 byte based on my understanding of an optimal bucket/fingerprint/size ratio from the aforementioned paper.
 * When the filter returns `NotEnoughSpace`, the element given is actually added to the filter, but some random *other*
   element gets removed. This could be improved by implementing a single-item eviction cache for that removed item.
+* There are no high-level bindings for other languages than C.
+  One could add them e.g. for python using [milksnake](https://github.com/getsentry/milksnake).
