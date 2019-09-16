@@ -1,7 +1,11 @@
 [package]
 name = "cuckoofilter"
 version = "0.4.0"
-authors = ["Seif Lotfy <seif.lotfy@gmail.com>", "Lukas Kalbertodt <lukas.kalbertodt@gmail.com>", "Florian Jacob <accounts+git@florianjacob.de>"]
+authors = [
+  "Seif Lotfy <seif.lotfy@gmail.com>", 
+  "Florian Jacob <accounts+git@florianjacob.de>", 
+  "The cuckoofilter contributors",
+]
 
 # A short blurb about the package. This is not rendered in any format when
 # uploaded to crates.io (aka this is not markdown)
