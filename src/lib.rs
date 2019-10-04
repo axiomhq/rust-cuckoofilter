@@ -271,6 +271,7 @@ where
 /// A minimal representation of the CuckooFilter which can be transfered or stored, then recovered at a later stage.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ExportedCuckooFilter {
+    #[serde(with = "serde_bytes")]
     pub values: Vec<u8>,
     pub length: usize,
 }
