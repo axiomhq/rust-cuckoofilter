@@ -28,7 +28,7 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 
-use bucket::{Bucket, Fingerprint, BUCKET_SIZE};
+use bucket::{Bucket, Fingerprint, BUCKET_SIZE, FINGERPRINT_SIZE};
 use util::{get_alt_index, get_fai, FaI};
 use rand::Rng;
 use std::iter::repeat;
@@ -293,7 +293,7 @@ impl<H> From<ExportedCuckooFilter> for CuckooFilter<H> {
         CuckooFilter {
             buckets: exported
                 .values
-                .chunks(BUCKET_SIZE)
+                .chunks(BUCKET_SIZE * FINGERPRINT_SIZE)
                 .map(|buffers| Bucket::from(buffers))
                 .collect::<Vec<_>>()
                 .into_boxed_slice(),
