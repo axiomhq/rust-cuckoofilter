@@ -1,6 +1,6 @@
 [package]
 name = "cuckoofilter"
-version = "0.4.1"
+version = "0.4.2"
 authors = [
   "Seif Lotfy <seif.lotfy@gmail.com>",
   "Seif Lotfy <seif@axiom.co>",
