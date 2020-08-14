@@ -52,11 +52,7 @@ impl FaI {
 
         let i1 = index_hash as usize;
         let i2 = get_alt_index::<H>(fp, i1);
-        FaI {
-            fp: fp,
-            i1: i1,
-            i2: i2,
-        }
+        FaI { fp, i1, i2 }
     }
 
     pub fn random_index<R: ::rand::Rng>(&self, r: &mut R) -> usize {
