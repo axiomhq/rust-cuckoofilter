@@ -39,7 +39,10 @@ fn false_positive_rate() {
     let false_positive_rate = (false_queries as f64) / (total_items as f64);
 
     println!("elements inserted: {}", num_inserted);
-    println!("memory usage: {:.2}KiB", (filter.memory_usage() as f64) / 1024.0);
+    println!(
+        "memory usage: {:.2}KiB",
+        (filter.memory_usage() as f64) / 1024.0
+    );
     println!("false positive rate: {}%", 100.0 * false_positive_rate);
     // ratio should be around 0.024, round up to 0.03 to accomodate for random fluctuation
     assert!(false_positive_rate < 0.03);

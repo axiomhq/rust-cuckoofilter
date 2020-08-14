@@ -29,16 +29,16 @@ extern crate serde;
 extern crate serde_derive;
 
 use bucket::{Bucket, Fingerprint, BUCKET_SIZE, FINGERPRINT_SIZE};
-use util::{get_alt_index, get_fai, FaI};
 use rand::Rng;
-use std::iter::repeat;
 use std::collections::hash_map::DefaultHasher;
+use std::convert::From;
+use std::error::Error as StdError;
+use std::fmt;
 use std::hash::{Hash, Hasher};
+use std::iter::repeat;
 use std::marker::PhantomData;
 use std::mem;
-use std::fmt;
-use std::error::Error as StdError;
-use std::convert::From;
+use util::{get_alt_index, get_fai, FaI};
 
 /// If insertion fails, we will retry this many times.
 pub const MAX_REBUCKET: u32 = 500;
