@@ -68,17 +68,22 @@ pub fn get_fai<T: ?Sized + Hash, H: Hasher + Default>(data: &T) -> FaI {
     FaI::from_data::<_, H>(data)
 }
 
-#[test]
-fn test_fp_and_index() {
-    use std::collections::hash_map::DefaultHasher;
-    let data = "seif";
-    let fai = get_fai::<_, DefaultHasher>(data);
-    let fp = fai.fp;
-    let i1 = fai.i1;
-    let i2 = fai.i2;
-    let i11 = get_alt_index::<DefaultHasher>(fp, i2);
-    assert_eq!(i11, i1);
+#[cfg(tests)]
+mod tests {
+    use super::*;
 
-    let i22 = get_alt_index::<DefaultHasher>(fp, i11);
-    assert_eq!(i22, i2);
+    #[test]
+    fn test_fp_and_index() {
+        use std::collections::hash_map::DefaultHasher;
+        let data = "seif";
+        let fai = get_fai::<_, DefaultHasher>(data);
+        let fp = fai.fp;
+        let i1 = fai.i1;
+        let i2 = fai.i2;
+        let i11 = get_alt_index::<DefaultHasher>(fp, i2);
+        assert_eq!(i11, i1);
+
+        let i22 = get_alt_index::<DefaultHasher>(fp, i11);
+        assert_eq!(i22, i2);
+    }
 }
