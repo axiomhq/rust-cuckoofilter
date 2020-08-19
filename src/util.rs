@@ -68,7 +68,7 @@ pub fn get_fai<T: ?Sized + Hash, H: Hasher + Default>(data: &T) -> FaI {
     FaI::from_data::<_, H>(data)
 }
 
-#[cfg(tests)]
+#[cfg(test)]
 mod tests {
     use super::*;
 
