@@ -66,7 +66,6 @@
 //! [cuckoofilter crate]: https://crates.io/crates/cuckoofilter
 //! [milksnake]: https://github.com/getsentry/milksnake
 
-
 extern crate cuckoofilter;
 
 use cuckoofilter::CuckooError;
@@ -84,7 +83,6 @@ pub enum rcf_cuckoofilter_status {
     RCF_NOT_FOUND,
     RCF_NOT_ENOUGH_SPACE,
 }
-
 
 /// Constructs a cuckoo filter with a given max capacity.
 /// The various wrapper methods of this crate operate on the returned reference.
@@ -111,11 +109,14 @@ pub extern "C" fn rcf_cuckoofilter_free(filter: *mut rcf_cuckoofilter) {
 /// `rcf_cuckoofilter_status::RCF_NOT_FOUND` otherwise.
 /// Aborts if the given `filter` is a null pointer.
 #[no_mangle]
-pub extern "C" fn rcf_cuckoofilter_contains(filter: *const rcf_cuckoofilter,
-                                            data: u64)
-                                            -> rcf_cuckoofilter_status {
+pub extern "C" fn rcf_cuckoofilter_contains(
+    filter: *const rcf_cuckoofilter,
+    data: u64,
+) -> rcf_cuckoofilter_status {
     let filter = unsafe { filter.as_ref() };
-    let found = filter.expect("Given rcf_cuckoofilter* is a null pointer").contains(&data);
+    let found = filter
+        .expect("Given rcf_cuckoofilter* is a null pointer")
+        .contains(&data);
     if found {
         rcf_cuckoofilter_status::RCF_OK
     } else {
@@ -130,11 +131,15 @@ pub extern "C" fn rcf_cuckoofilter_contains(filter: *const rcf_cuckoofilter,
 /// space for it.
 /// Aborts if the given `filter` is a null pointer.
 #[no_mangle]
-pub extern "C" fn rcf_cuckoofilter_add(filter: *mut rcf_cuckoofilter,
-                                       data: u64)
-                                       -> rcf_cuckoofilter_status {
+pub extern "C" fn rcf_cuckoofilter_add(
+    filter: *mut rcf_cuckoofilter,
+    data: u64,
+) -> rcf_cuckoofilter_status {
     let filter = unsafe { filter.as_mut() };
-    match filter.expect("Given rcf_cuckoofilter* is a null pointer").add(&data) {
+    match filter
+        .expect("Given rcf_cuckoofilter* is a null pointer")
+        .add(&data)
+    {
         Ok(_) => rcf_cuckoofilter_status::RCF_OK,
         Err(CuckooError::NotEnoughSpace) => rcf_cuckoofilter_status::RCF_NOT_ENOUGH_SPACE,
     }
@@ -145,7 +150,9 @@ pub extern "C" fn rcf_cuckoofilter_add(filter: *mut rcf_cuckoofilter,
 #[no_mangle]
 pub extern "C" fn rcf_cuckoofilter_len(filter: *const rcf_cuckoofilter) -> usize {
     let filter = unsafe { filter.as_ref() };
-    filter.expect("Given rcf_cuckoofilter* is a null pointer").len()
+    filter
+        .expect("Given rcf_cuckoofilter* is a null pointer")
+        .len()
 }
 
 /// Checks if `filter` is empty.
@@ -154,7 +161,9 @@ pub extern "C" fn rcf_cuckoofilter_len(filter: *const rcf_cuckoofilter) -> usize
 #[no_mangle]
 pub extern "C" fn rcf_cuckoofilter_is_empty(filter: *const rcf_cuckoofilter) -> bool {
     let filter = unsafe { filter.as_ref() };
-    filter.expect("Given rcf_cuckoofilter* is a null pointer").is_empty()
+    filter
+        .expect("Given rcf_cuckoofilter* is a null pointer")
+        .is_empty()
 }
 
 /// Returns the number of bytes the `filter` occupies in memory.
@@ -162,20 +171,24 @@ pub extern "C" fn rcf_cuckoofilter_is_empty(filter: *const rcf_cuckoofilter) -> 
 #[no_mangle]
 pub extern "C" fn rcf_cuckoofilter_memory_usage(filter: *const rcf_cuckoofilter) -> usize {
     let filter = unsafe { filter.as_ref() };
-    filter.expect("Given rcf_cuckoofilter* is a null pointer").memory_usage()
+    filter
+        .expect("Given rcf_cuckoofilter* is a null pointer")
+        .memory_usage()
 }
-
 
 /// Deletes `data` from the `filter`.
 /// Returns `rcf_cuckoofilter_status::RCF_OK` if `data` existed in the filter before,
 /// `rcf_cuckoofilter_status::RCF_NOT_FOUND` if `data` did not exist.
 /// Aborts if the given `filter` is a null pointer.
 #[no_mangle]
-pub extern "C" fn rcf_cuckoofilter_delete(filter: *mut rcf_cuckoofilter,
-                                          data: u64)
-                                          -> rcf_cuckoofilter_status {
+pub extern "C" fn rcf_cuckoofilter_delete(
+    filter: *mut rcf_cuckoofilter,
+    data: u64,
+) -> rcf_cuckoofilter_status {
     let filter = unsafe { filter.as_mut() };
-    let found = filter.expect("Given rcf_cuckoofilter* is a null pointer").delete(&data);
+    let found = filter
+        .expect("Given rcf_cuckoofilter* is a null pointer")
+        .delete(&data);
     if found {
         rcf_cuckoofilter_status::RCF_OK
     } else {

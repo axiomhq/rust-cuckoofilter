@@ -1,6 +1,6 @@
-use std::hash::{Hash, Hasher};
-use byteorder::{BigEndian, WriteBytesExt};
 use bucket::{Fingerprint, FINGERPRINT_SIZE};
+use byteorder::{BigEndian, WriteBytesExt};
+use std::hash::{Hash, Hasher};
 
 // A struct combining *F*ingerprint *a*nd *I*ndexes,
 // to have a return type with named fields
@@ -52,11 +52,7 @@ impl FaI {
 
         let i1 = index_hash as usize;
         let i2 = get_alt_index::<H>(fp, i1);
-        FaI {
-            fp: fp,
-            i1: i1,
-            i2: i2,
-        }
+        FaI { fp, i1, i2 }
     }
 
     pub fn random_index<R: ::rand::Rng>(&self, r: &mut R) -> usize {
@@ -72,17 +68,22 @@ pub fn get_fai<T: ?Sized + Hash, H: Hasher + Default>(data: &T) -> FaI {
     FaI::from_data::<_, H>(data)
 }
 
-#[test]
-fn test_fp_and_index() {
-    use std::collections::hash_map::DefaultHasher;
-    let data = "seif";
-    let fai = get_fai::<_, DefaultHasher>(data);
-    let fp = fai.fp;
-    let i1 = fai.i1;
-    let i2 = fai.i2;
-    let i11 = get_alt_index::<DefaultHasher>(fp, i2);
-    assert_eq!(i11, i1);
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    let i22 = get_alt_index::<DefaultHasher>(fp, i11);
-    assert_eq!(i22, i2);
+    #[test]
+    fn test_fp_and_index() {
+        use std::collections::hash_map::DefaultHasher;
+        let data = "seif";
+        let fai = get_fai::<_, DefaultHasher>(data);
+        let fp = fai.fp;
+        let i1 = fai.i1;
+        let i2 = fai.i2;
+        let i11 = get_alt_index::<DefaultHasher>(fp, i2);
+        assert_eq!(i11, i1);
+
+        let i22 = get_alt_index::<DefaultHasher>(fp, i11);
+        assert_eq!(i22, i2);
+    }
 }

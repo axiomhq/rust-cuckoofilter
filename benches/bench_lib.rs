@@ -1,18 +1,18 @@
 #![feature(test)]
 
 extern crate cuckoofilter;
-extern crate test;
-extern crate rand;
-#[cfg(feature = "fnv")]
-extern crate fnv;
 #[cfg(feature = "farmhash")]
 extern crate farmhash;
+#[cfg(feature = "fnv")]
+extern crate fnv;
+extern crate rand;
+extern crate test;
 
 use self::cuckoofilter::*;
+use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
-use std::error::Error;
 
 fn get_words() -> String {
     let path = Path::new("/usr/share/dict/words");
