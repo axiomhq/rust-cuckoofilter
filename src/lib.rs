@@ -300,13 +300,13 @@ impl<H> From<ExportedCuckooFilter> for CuckooFilter<H> {
     }
 }
 
-impl<'a, H> From<&'a CuckooFilter<H>> for ExportedCuckooFilter
+impl<H> From<&CuckooFilter<H>> for ExportedCuckooFilter
 where
     H: Hasher + Default,
 {
     /// Converts a `CuckooFilter` into a simplified version which can be serialized and stored
     /// for later use.
-    fn from(cuckoo: &'a CuckooFilter<H>) -> ExportedCuckooFilter {
+    fn from(cuckoo: &CuckooFilter<H>) -> ExportedCuckooFilter {
         ExportedCuckooFilter {
             values: cuckoo.values(),
             length: cuckoo.len(),
