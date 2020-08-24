@@ -93,9 +93,9 @@ impl Bucket {
     }
 }
 
-impl<'a> From<&'a [u8]> for Bucket {
+impl From<&[u8]> for Bucket {
     /// Constructs a buffer of fingerprints from a set of previously exported fingerprints.
-    fn from(fingerprints: &'a [u8]) -> Self {
+    fn from(fingerprints: &[u8]) -> Self {
         let mut buffer = [Fingerprint::empty(); BUCKET_SIZE];
         for (idx, value) in fingerprints.chunks(FINGERPRINT_SIZE).enumerate() {
             buffer[idx].slice_copy(value);

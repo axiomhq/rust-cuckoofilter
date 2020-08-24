@@ -30,6 +30,8 @@ keywords = ["bloomfilter", "cuckoohashing", "cuckoofilter"]
 # be separated with a `/`
 license = "MIT"
 
+edition = "2018"
+
 [features]
 default = []
 dev = ["clippy"]

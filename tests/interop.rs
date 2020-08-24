@@ -1,7 +1,5 @@
-extern crate cuckoofilter;
-extern crate serde_json;
-
 use cuckoofilter::{CuckooFilter, ExportedCuckooFilter};
+
 use std::collections::hash_map::DefaultHasher;
 
 #[test]

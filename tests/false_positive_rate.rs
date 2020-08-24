@@ -1,5 +1,5 @@
-extern crate cuckoofilter;
 use cuckoofilter::CuckooFilter;
+
 use std::collections::hash_map::DefaultHasher;
 
 // Modelled after
