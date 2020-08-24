@@ -12,8 +12,8 @@ impl Fingerprint {
     /// Attempts to create a new Fingerprint based on the given
     /// number. If the created Fingerprint would be equal to the
     /// empty Fingerprint, None is returned.
-    pub fn from_data(data: [u8; FINGERPRINT_SIZE]) -> Option<Fingerprint> {
-        let result = Fingerprint { data };
+    pub fn from_data(data: [u8; FINGERPRINT_SIZE]) -> Option<Self> {
+        let result = Self { data };
         if result.is_empty() {
             None
         } else {
@@ -22,8 +22,8 @@ impl Fingerprint {
     }
 
     /// Returns the empty Fingerprint.
-    pub fn empty() -> Fingerprint {
-        Fingerprint {
+    pub fn empty() -> Self {
+        Self {
             data: EMPTY_FINGERPRINT_DATA,
         }
     }
@@ -47,8 +47,8 @@ pub struct Bucket {
 
 impl Bucket {
     /// Creates a new bucket with a pre-allocated buffer.
-    pub fn new() -> Bucket {
-        Bucket {
+    pub fn new() -> Self {
+        Self {
             buffer: [Fingerprint::empty(); BUCKET_SIZE],
         }
     }
@@ -98,6 +98,6 @@ impl From<&[u8]> for Bucket {
         for (idx, value) in fingerprints.chunks(FINGERPRINT_SIZE).enumerate() {
             buffer[idx].slice_copy(value);
         }
-        Bucket { buffer }
+        Self { buffer }
     }
 }
