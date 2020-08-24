@@ -35,6 +35,7 @@ use std::marker::PhantomData;
 use std::mem;
 
 use rand::Rng;
+#[cfg(feature = "serde_support")]
 use serde_derive::{Deserialize, Serialize};
 
 /// If insertion fails, we will retry this many times.
@@ -266,9 +267,10 @@ where
 }
 
 /// A minimal representation of the CuckooFilter which can be transfered or stored, then recovered at a later stage.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug)]
+#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct ExportedCuckooFilter {
-    #[serde(with = "serde_bytes")]
+    #[cfg_attr(feature = "serde_support", serde(with = "serde_bytes"))]
     pub values: Vec<u8>,
     pub length: usize,
 }

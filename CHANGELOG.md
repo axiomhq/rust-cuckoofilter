@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+- Serde support is now behind the feature flag `serde_support` and is disabled by default.
+
 ## [v0.4.0] - 2018-04-1
 ### Added
 - `ExportedCuckooFilter` adds the ability to serialize the memory map of a `CuckooFilter` via Serde; reducing communication overhead between nodes for example, or the ability to store the current state on disk for retrieval at a later time.
