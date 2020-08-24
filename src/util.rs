@@ -79,9 +79,7 @@ mod tests {
         use std::collections::hash_map::DefaultHasher;
         let data = "seif";
         let fai = get_fai::<_, DefaultHasher>(data);
-        let fp = fai.fp;
-        let i1 = fai.i1;
-        let i2 = fai.i2;
+        let FaI { fp, i1, i2 } = fai;
         let i11 = get_alt_index::<DefaultHasher>(fp, i2);
         assert_eq!(i11, i1);
 
