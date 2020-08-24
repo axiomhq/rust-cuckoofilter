@@ -25,6 +25,7 @@ mod util;
 use crate::bucket::{Bucket, Fingerprint, BUCKET_SIZE, FINGERPRINT_SIZE};
 use crate::util::{get_alt_index, get_fai, FaI};
 
+use std::cmp;
 use std::collections::hash_map::DefaultHasher;
 use std::error::Error as StdError;
 use std::fmt;
@@ -123,10 +124,7 @@ where
 {
     /// Constructs a Cuckoo Filter with a given max capacity
     pub fn with_capacity(cap: usize) -> Self {
-        let capacity = match cap.next_power_of_two() / BUCKET_SIZE {
-            0 => 1,
-            cap => cap,
-        };
+        let capacity = cmp::max(1, cap.next_power_of_two() / BUCKET_SIZE);
 
         Self {
             buckets: repeat(Bucket::new())
@@ -198,10 +196,7 @@ where
         if self.contains(data) {
             Ok(false)
         } else {
-            match self.add(data) {
-                Ok(_) => Ok(true),
-                Err(e) => Err(e),
-            }
+            self.add(data).map(|_| true)
         }
     }
 
