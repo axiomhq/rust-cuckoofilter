@@ -1,6 +1,8 @@
-use bucket::{Fingerprint, FINGERPRINT_SIZE};
-use byteorder::{BigEndian, WriteBytesExt};
+use crate::bucket::{Fingerprint, FINGERPRINT_SIZE};
+
 use std::hash::{Hash, Hasher};
+
+use byteorder::{BigEndian, WriteBytesExt};
 
 // A struct combining *F*ingerprint *a*nd *I*ndexes,
 // to have a return type with named fields

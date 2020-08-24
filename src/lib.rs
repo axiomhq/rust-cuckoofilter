@@ -22,14 +22,9 @@
 mod bucket;
 mod util;
 
-extern crate byteorder;
-extern crate rand;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
+use crate::bucket::{Bucket, Fingerprint, BUCKET_SIZE, FINGERPRINT_SIZE};
+use crate::util::{get_alt_index, get_fai, FaI};
 
-use bucket::{Bucket, Fingerprint, BUCKET_SIZE, FINGERPRINT_SIZE};
-use rand::Rng;
 use std::collections::hash_map::DefaultHasher;
 use std::convert::From;
 use std::error::Error as StdError;
@@ -38,7 +33,9 @@ use std::hash::{Hash, Hasher};
 use std::iter::repeat;
 use std::marker::PhantomData;
 use std::mem;
-use util::{get_alt_index, get_fai, FaI};
+
+use rand::Rng;
+use serde_derive::{Deserialize, Serialize};
 
 /// If insertion fails, we will retry this many times.
 pub const MAX_REBUCKET: u32 = 500;
