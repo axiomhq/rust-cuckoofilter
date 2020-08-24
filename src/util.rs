@@ -33,7 +33,7 @@ impl FaI {
     fn from_data<T: ?Sized + Hash, H: Hasher + Default>(data: &T) -> Self {
         let (fp_hash, index_hash) = get_hash::<_, H>(data);
 
-        let mut fp_hash_arr = [0; 4];
+        let mut fp_hash_arr = [0; FINGERPRINT_SIZE];
         let _ = (&mut fp_hash_arr[..]).write_u32::<BigEndian>(fp_hash);
         let mut valid_fp_hash: [u8; FINGERPRINT_SIZE] = [0; FINGERPRINT_SIZE];
         let mut n = 0;
