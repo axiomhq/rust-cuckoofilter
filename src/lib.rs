@@ -26,7 +26,6 @@ use crate::bucket::{Bucket, Fingerprint, BUCKET_SIZE, FINGERPRINT_SIZE};
 use crate::util::{get_alt_index, get_fai, FaI};
 
 use std::collections::hash_map::DefaultHasher;
-use std::convert::From;
 use std::error::Error as StdError;
 use std::fmt;
 use std::hash::{Hash, Hasher};
