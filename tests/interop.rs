@@ -40,6 +40,7 @@ fn interoperability() {
 }
 
 #[test]
+#[cfg(feature = "serde_support")]
 fn serialization() {
     // Just a small filter to test serialization.
     let mut filter = CuckooFilter::<DefaultHasher>::with_capacity(100);
