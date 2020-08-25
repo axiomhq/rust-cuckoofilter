@@ -30,10 +30,10 @@ pub fn get_alt_index<H: Hasher + Default>(fp: Fingerprint, i: usize) -> usize {
 }
 
 impl FaI {
-    fn from_data<T: ?Sized + Hash, H: Hasher + Default>(data: &T) -> FaI {
+    fn from_data<T: ?Sized + Hash, H: Hasher + Default>(data: &T) -> Self {
         let (fp_hash, index_hash) = get_hash::<_, H>(data);
 
-        let mut fp_hash_arr = [0; 4];
+        let mut fp_hash_arr = [0; FINGERPRINT_SIZE];
         let _ = (&mut fp_hash_arr[..]).write_u32::<BigEndian>(fp_hash);
         let mut valid_fp_hash: [u8; FINGERPRINT_SIZE] = [0; FINGERPRINT_SIZE];
         let mut n = 0;
@@ -54,7 +54,7 @@ impl FaI {
 
         let i1 = index_hash as usize;
         let i2 = get_alt_index::<H>(fp, i1);
-        FaI { fp, i1, i2 }
+        Self { fp, i1, i2 }
     }
 
     pub fn random_index<R: ::rand::Rng>(&self, r: &mut R) -> usize {
@@ -79,9 +79,7 @@ mod tests {
         use std::collections::hash_map::DefaultHasher;
         let data = "seif";
         let fai = get_fai::<_, DefaultHasher>(data);
-        let fp = fai.fp;
-        let i1 = fai.i1;
-        let i2 = fai.i2;
+        let FaI { fp, i1, i2 } = fai;
         let i11 = get_alt_index::<DefaultHasher>(fp, i2);
         assert_eq!(i11, i1);
 

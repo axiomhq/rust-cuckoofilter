@@ -25,8 +25,8 @@ mod util;
 use crate::bucket::{Bucket, Fingerprint, BUCKET_SIZE, FINGERPRINT_SIZE};
 use crate::util::{get_alt_index, get_fai, FaI};
 
+use std::cmp;
 use std::collections::hash_map::DefaultHasher;
-use std::convert::From;
 use std::error::Error as StdError;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -108,13 +108,13 @@ pub struct CuckooFilter<H> {
 
 impl Default for CuckooFilter<DefaultHasher> {
     fn default() -> Self {
-        CuckooFilter::new()
+        Self::new()
     }
 }
 
 impl CuckooFilter<DefaultHasher> {
     /// Construct a CuckooFilter with default capacity and hasher.
-    pub fn new() -> CuckooFilter<DefaultHasher> {
+    pub fn new() -> Self {
         Self::with_capacity(DEFAULT_CAPACITY)
     }
 }
@@ -124,13 +124,10 @@ where
     H: Hasher + Default,
 {
     /// Constructs a Cuckoo Filter with a given max capacity
-    pub fn with_capacity(cap: usize) -> CuckooFilter<H> {
-        let capacity = match cap.next_power_of_two() / BUCKET_SIZE {
-            0 => 1,
-            cap => cap,
-        };
+    pub fn with_capacity(cap: usize) -> Self {
+        let capacity = cmp::max(1, cap.next_power_of_two() / BUCKET_SIZE);
 
-        CuckooFilter {
+        Self {
             buckets: repeat(Bucket::new())
                 .take(capacity)
                 .collect::<Vec<_>>()
@@ -200,10 +197,7 @@ where
         if self.contains(data) {
             Ok(false)
         } else {
-            match self.add(data) {
-                Ok(_) => Ok(true),
-                Err(e) => Err(e),
-            }
+            self.add(data).map(|_| true)
         }
     }
 
@@ -287,9 +281,9 @@ impl<H> From<ExportedCuckooFilter> for CuckooFilter<H> {
     /// * `length` - The number of valid fingerprints inside the `CuckooFilter`.
     /// This value is used as a time saving method, otherwise all fingerprints
     /// would need to be checked for equivalence against the null pattern.
-    fn from(exported: ExportedCuckooFilter) -> CuckooFilter<H> {
+    fn from(exported: ExportedCuckooFilter) -> Self {
         // Assumes that the `BUCKET_SIZE` and `FINGERPRINT_SIZE` constants do not change.
-        CuckooFilter {
+        Self {
             buckets: exported
                 .values
                 .chunks(BUCKET_SIZE * FINGERPRINT_SIZE)
@@ -308,8 +302,8 @@ where
 {
     /// Converts a `CuckooFilter` into a simplified version which can be serialized and stored
     /// for later use.
-    fn from(cuckoo: &CuckooFilter<H>) -> ExportedCuckooFilter {
-        ExportedCuckooFilter {
+    fn from(cuckoo: &CuckooFilter<H>) -> Self {
+        Self {
             values: cuckoo.values(),
             length: cuckoo.len(),
         }
