@@ -96,6 +96,16 @@ impl StdError for CuckooError {
 /// assert_eq!(cf.len(), 0);
 /// assert!(cf.is_empty());
 ///
+/// for s in &words {
+///     if cf.test_and_add(s).unwrap() {
+///         insertions += 1;
+///     }
+/// }
+///
+/// cf.clear();
+///
+/// assert!(cf.is_empty());
+///
 /// ```
 pub struct CuckooFilter<H> {
     buckets: Box<[Bucket]>,
@@ -225,6 +235,18 @@ where
     pub fn delete<T: ?Sized + Hash>(&mut self, data: &T) -> bool {
         let FaI { fp, i1, i2 } = get_fai::<T, H>(data);
         self.remove(fp, i1) || self.remove(fp, i2)
+    }
+
+    /// Empty all the buckets in a filter and reset the number of items.
+    pub fn clear(&mut self) {
+        if self.is_empty() {
+            return;
+        }
+
+        for bucket in self.buckets.iter_mut() {
+            bucket.clear();
+        }
+        self.len = 0;
     }
 
     /// Extracts fingerprint values from all buckets, used for exporting the filters data.

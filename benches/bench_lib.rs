@@ -52,6 +52,15 @@ fn bench_new(b: &mut test::Bencher) {
     });
 }
 
+#[bench]
+fn bench_clear(b: &mut test::Bencher) {
+    let mut cf = test::black_box(CuckooFilter::new());
+
+    b.iter(|| {
+        test::black_box(cf.clear());
+    });
+}
+
 #[cfg(feature = "farmhash")]
 #[bench]
 fn bench_insertion_farmhash(b: &mut test::Bencher) {
