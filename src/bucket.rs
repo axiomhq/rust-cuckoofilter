@@ -89,6 +89,12 @@ impl Bucket {
             .cloned()
             .collect()
     }
+
+    /// Empties the bucket by setting each used entry to Fingerprint::empty(). Returns the number of entries that were modified.
+    #[inline(always)]
+    pub fn clear(&mut self) {
+        *self = Self::new()
+    }
 }
 
 impl From<&[u8]> for Bucket {
