@@ -177,7 +177,7 @@ where
         for _ in 0..MAX_REBUCKET {
             let other_fp;
             {
-                let loc = &mut self.buckets[i % len].buffer[rng.gen_range(0, BUCKET_SIZE)];
+                let loc = &mut self.buckets[i % len].buffer[rng.gen_range(0..BUCKET_SIZE)];
                 other_fp = *loc;
                 *loc = fp;
                 i = get_alt_index::<H>(other_fp, i);
