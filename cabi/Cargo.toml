@@ -22,7 +22,7 @@ lto = true
 cuckoofilter = { version = "0.4", path = "../" }
 
 [build-dependencies]
-cbindgen = "0.5"
+cbindgen = "0.24.3"
 
 [lib]
 # foreign programs can link against cdylib or staticlib to use rust-cuckoofilter's C API

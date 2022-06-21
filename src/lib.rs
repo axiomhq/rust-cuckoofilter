@@ -177,7 +177,7 @@ where
         for _ in 0..MAX_REBUCKET {
             let other_fp;
             {
-                let loc = &mut self.buckets[i % len].buffer[rng.gen_range(0, BUCKET_SIZE)];
+                let loc = &mut self.buckets[i % len].buffer[rng.gen_range(0..BUCKET_SIZE)];
                 other_fp = *loc;
                 *loc = fp;
                 i = get_alt_index::<H>(other_fp, i);
@@ -193,7 +193,7 @@ where
         // check this cache in all methods additionally to the actual filter,
         // and return NotEnoughSpace if that cache is already in use.
         // This would complicate the code, but stop random elements from
-        // getting removed and result in nicer behaviour for the user.
+        // getting removed and result in nicer behavior for the user.
         Err(CuckooError::NotEnoughSpace)
     }
 
@@ -279,7 +279,7 @@ where
     }
 }
 
-/// A minimal representation of the CuckooFilter which can be transfered or stored, then recovered at a later stage.
+/// A minimal representation of the CuckooFilter which can be transferred or stored, then recovered at a later stage.
 #[derive(Debug)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct ExportedCuckooFilter {
