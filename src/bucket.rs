@@ -3,7 +3,7 @@ pub const BUCKET_SIZE: usize = 4;
 const EMPTY_FINGERPRINT_DATA: [u8; FINGERPRINT_SIZE] = [100; FINGERPRINT_SIZE];
 
 // Fingerprint Size is 1 byte so lets remove the Vec
-#[derive(PartialEq, Copy, Clone, Hash)]
+#[derive(PartialEq, Eq, Copy, Clone, Hash)]
 pub struct Fingerprint {
     pub data: [u8; FINGERPRINT_SIZE],
 }

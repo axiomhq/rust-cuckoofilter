@@ -22,13 +22,13 @@ fn get_words() -> String {
     let mut file = match File::open(&path) {
         // The `description` method of `io::Error` returns a string that
         // describes the error
-        Err(why) => panic!("couldn't open {}: {}", display, Error::description(&why)),
+        Err(why) => panic!("couldn't open {}: {}", display, &why),
         Ok(file) => file,
     };
 
     let mut contents = String::new();
     if let Err(why) = file.read_to_string(&mut contents) {
-        panic!("couldn't read {}: {}", display, Error::description(&why));
+        panic!("couldn't read {}: {}", display, &why);
     }
     contents
 }
