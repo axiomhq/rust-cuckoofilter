@@ -281,7 +281,7 @@ where
 }
 
 /// A minimal representation of the CuckooFilter which can be transfered or stored, then recovered at a later stage.
-#[derive(Debug)]
+#[derive(Debug, Clone, Default)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct ExportedCuckooFilter {
     #[cfg_attr(feature = "serde_support", serde(with = "serde_bytes"))]
