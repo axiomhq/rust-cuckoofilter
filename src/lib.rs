@@ -107,6 +107,7 @@ impl StdError for CuckooError {
 /// assert!(cf.is_empty());
 ///
 /// ```
+#[derive(Debug, Clone)]
 pub struct CuckooFilter<H> {
     buckets: Box<[Bucket]>,
     len: usize,
