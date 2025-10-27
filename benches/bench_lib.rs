@@ -9,7 +9,6 @@ extern crate rand;
 extern crate test;
 
 use self::cuckoofilter::*;
-use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
