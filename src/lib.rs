@@ -193,7 +193,7 @@ where
         // check this cache in all methods additionally to the actual filter,
         // and return NotEnoughSpace if that cache is already in use.
         // This would complicate the code, but stop random elements from
-        // getting removed and result in nicer behaviour for the user.
+        // getting removed and result in nicer behavior for the user.
         Err(CuckooError::NotEnoughSpace)
     }
 
@@ -279,7 +279,7 @@ where
     }
 }
 
-/// A minimal representation of the CuckooFilter which can be transfered or stored, then recovered at a later stage.
+/// A minimal representation of the CuckooFilter which can be transferred or stored, then recovered at a later stage.
 #[derive(Debug)]
 #[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
 pub struct ExportedCuckooFilter {
