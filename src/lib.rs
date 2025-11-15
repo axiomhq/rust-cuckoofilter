@@ -27,7 +27,6 @@ use std::collections::hash_map::DefaultHasher;
 use std::error::Error as StdError;
 use std::fmt;
 use std::hash::{Hash, Hasher};
-use std::iter::repeat;
 use std::marker::PhantomData;
 use std::mem;
 
@@ -136,10 +135,7 @@ where
         let capacity = cmp::max(1, cap.next_power_of_two() / BUCKET_SIZE);
 
         Self {
-            buckets: repeat(Bucket::new())
-                .take(capacity)
-                .collect::<Vec<_>>()
-                .into_boxed_slice(),
+            buckets: vec![Bucket::new(); capacity].into_boxed_slice(),
             len: 0,
             _hasher: PhantomData,
         }
@@ -303,11 +299,11 @@ impl<H> From<ExportedCuckooFilter> for CuckooFilter<H> {
     /// # Contents
     ///
     /// * `values` - A serialized version of the `CuckooFilter`'s memory, where the
-    /// fingerprints in each bucket are chained one after another, then in turn all
-    /// buckets are chained together.
+    ///   fingerprints in each bucket are chained one after another, then in turn all
+    ///   buckets are chained together.
     /// * `length` - The number of valid fingerprints inside the `CuckooFilter`.
-    /// This value is used as a time saving method, otherwise all fingerprints
-    /// would need to be checked for equivalence against the null pattern.
+    ///   This value is used as a time saving method, otherwise all fingerprints
+    ///   would need to be checked for equivalence against the null pattern.
     fn from(exported: ExportedCuckooFilter) -> Self {
         // Assumes that the `BUCKET_SIZE` and `FINGERPRINT_SIZE` constants do not change.
         Self {
