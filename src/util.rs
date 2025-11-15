@@ -3,6 +3,7 @@ use crate::bucket::{Fingerprint, FINGERPRINT_SIZE};
 use std::hash::{Hash, Hasher};
 
 use byteorder::{BigEndian, WriteBytesExt};
+use rand::RngExt;
 
 // A struct combining *F*ingerprint *a*nd *I*ndexes,
 // to have a return type with named fields
@@ -58,7 +59,7 @@ impl FaI {
     }
 
     pub fn random_index<R: ::rand::Rng>(&self, r: &mut R) -> usize {
-        if r.gen() {
+        if r.random() {
             self.i1
         } else {
             self.i2
