@@ -26,7 +26,7 @@ fn get_hash<T: ?Sized + Hash, H: Hasher + Default>(data: &T) -> (u32, u32) {
 pub fn get_alt_index<H: Hasher + Default>(fp: Fingerprint, i: usize) -> usize {
     let (_, index_hash) = get_hash::<_, H>(&fp.data);
     let alt_i = index_hash as usize;
-    (i ^ alt_i) as usize
+    i ^ alt_i
 }
 
 impl FaI {
@@ -58,7 +58,7 @@ impl FaI {
     }
 
     pub fn random_index<R: ::rand::Rng>(&self, r: &mut R) -> usize {
-        if r.gen() {
+        if r.random() {
             self.i1
         } else {
             self.i2
