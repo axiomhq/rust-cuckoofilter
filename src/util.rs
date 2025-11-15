@@ -58,7 +58,7 @@ impl FaI {
     }
 
     pub fn random_index<R: ::rand::Rng>(&self, r: &mut R) -> usize {
-        if r.gen() {
+        if r.random() {
             self.i1
         } else {
             self.i2

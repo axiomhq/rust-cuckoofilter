@@ -260,13 +260,13 @@ where
             return Ok(());
         }
         let len = self.buckets.len();
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let mut i = fai.random_index(&mut rng);
         let mut fp = fai.fp;
         for _ in 0..MAX_REBUCKET {
             let other_fp;
             {
-                let loc = &mut self.buckets[i % len].buffer[rng.gen_range(0..BUCKET_SIZE)];
+                let loc = &mut self.buckets[i % len].buffer[rng.random_range(0..BUCKET_SIZE)];
                 other_fp = *loc;
                 *loc = fp;
                 i = get_alt_index::<H>(other_fp, i);
