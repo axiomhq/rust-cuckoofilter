@@ -147,12 +147,7 @@ where
 
     /// Checks if `data` is in the filter.
     pub fn contains<T: ?Sized + Hash>(&self, data: &T) -> bool {
-        let FaI { fp, i1, i2 } = get_fai::<T, H>(data);
-        let len = self.buckets.len();
-        self.buckets[i1 % len]
-            .get_fingerprint_index(fp)
-            .or_else(|| self.buckets[i2 % len].get_fingerprint_index(fp))
-            .is_some()
+        self.contains_fai(&get_fai::<T, H>(data))
     }
 
     /// Adds `data` to the filter. Returns `Ok` if the insertion was successful,
@@ -167,45 +162,18 @@ where
     /// actually added to the filter, but some random *other* element was
     /// removed. This might improve in the future.
     pub fn add<T: ?Sized + Hash>(&mut self, data: &T) -> Result<(), CuckooError> {
-        let fai = get_fai::<T, H>(data);
-        if self.put(fai.fp, fai.i1) || self.put(fai.fp, fai.i2) {
-            return Ok(());
-        }
-        let len = self.buckets.len();
-        let mut rng = rand::thread_rng();
-        let mut i = fai.random_index(&mut rng);
-        let mut fp = fai.fp;
-        for _ in 0..MAX_REBUCKET {
-            let other_fp;
-            {
-                let loc = &mut self.buckets[i % len].buffer[rng.gen_range(0..BUCKET_SIZE)];
-                other_fp = *loc;
-                *loc = fp;
-                i = get_alt_index::<H>(other_fp, i);
-            }
-            if self.put(other_fp, i) {
-                return Ok(());
-            }
-            fp = other_fp;
-        }
-        // fp is dropped here, which means that the last item that was
-        // rebucketed gets removed from the filter.
-        // TODO: One could introduce a single-item cache for this element,
-        // check this cache in all methods additionally to the actual filter,
-        // and return NotEnoughSpace if that cache is already in use.
-        // This would complicate the code, but stop random elements from
-        // getting removed and result in nicer behavior for the user.
-        Err(CuckooError::NotEnoughSpace)
+        self.add_fai(get_fai::<T, H>(data))
     }
 
     /// Adds `data` to the filter if it does not exist in the filter yet.
     /// Returns `Ok(true)` if `data` was not yet present in the filter and added
     /// successfully.
     pub fn test_and_add<T: ?Sized + Hash>(&mut self, data: &T) -> Result<bool, CuckooError> {
-        if self.contains(data) {
+        let fai = get_fai::<T, H>(data);
+        if self.contains_fai(&fai) {
             Ok(false)
         } else {
-            self.add(data).map(|_| true)
+            self.add_fai(fai).map(|_| true)
         }
     }
 
@@ -277,6 +245,45 @@ where
         } else {
             false
         }
+    }
+
+    fn contains_fai(&self, fai: &FaI) -> bool {
+        let len = self.buckets.len();
+        self.buckets[fai.i1 % len]
+            .get_fingerprint_index(fai.fp)
+            .or_else(|| self.buckets[fai.i2 % len].get_fingerprint_index(fai.fp))
+            .is_some()
+    }
+
+    fn add_fai(&mut self, fai: FaI) -> Result<(), CuckooError> {
+        if self.put(fai.fp, fai.i1) || self.put(fai.fp, fai.i2) {
+            return Ok(());
+        }
+        let len = self.buckets.len();
+        let mut rng = rand::thread_rng();
+        let mut i = fai.random_index(&mut rng);
+        let mut fp = fai.fp;
+        for _ in 0..MAX_REBUCKET {
+            let other_fp;
+            {
+                let loc = &mut self.buckets[i % len].buffer[rng.gen_range(0..BUCKET_SIZE)];
+                other_fp = *loc;
+                *loc = fp;
+                i = get_alt_index::<H>(other_fp, i);
+            }
+            if self.put(other_fp, i) {
+                return Ok(());
+            }
+            fp = other_fp;
+        }
+        // fp is dropped here, which means that the last item that was
+        // rebucketed gets removed from the filter.
+        // TODO: One could introduce a single-item cache for this element,
+        // check this cache in all methods additionally to the actual filter,
+        // and return NotEnoughSpace if that cache is already in use.
+        // This would complicate the code, but stop random elements from
+        // getting removed and result in nicer behavior for the user.
+        Err(CuckooError::NotEnoughSpace)
     }
 }
 
